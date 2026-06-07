@@ -314,6 +314,52 @@ svg{width:18px;height:18px;display:block;}
 .fokus-back svg{width:16px;height:16px;}
 .fokus-back:hover{color:var(--text);}
 
+/* ── Notizen ── */
+.notes-empty{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:20px;color:var(--muted);font-size:14px;line-height:1.5;text-align:center;margin-bottom:14px;}
+.notes-addarea{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:none;border:1px dashed var(--line);color:var(--muted);border-radius:12px;padding:14px;font-size:14px;cursor:pointer;margin-top:12px;transition:.13s;}
+.notes-addarea svg{width:16px;height:16px;}
+.notes-addarea:hover{border-color:var(--accent-dim);color:var(--text);}
+.notes-area-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.notes-area-title{font-family:'Bricolage Grotesque';font-weight:800;font-size:24px;letter-spacing:-.5px;}
+.notes-area-del{background:none;border:none;color:var(--faint);cursor:pointer;padding:4px;transition:.13s;}
+.notes-area-del svg{width:18px;height:18px;}
+.notes-area-del:hover{color:var(--p1);}
+.notes-list{display:flex;flex-direction:column;gap:9px;}
+.note-card{display:flex;flex-direction:column;gap:6px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 15px;cursor:pointer;text-align:left;transition:.14s;}
+.note-card:hover{border-color:#3a362e;transform:translateY(-1px);}
+.note-card-top{display:flex;align-items:center;gap:9px;}
+.note-card-icon{color:var(--accent-dim);display:flex;flex-shrink:0;}
+.note-card-icon svg{width:16px;height:16px;}
+.note-card-title{font-size:15.5px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.note-card-preview{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-left:25px;}
+.notes-add-row{display:flex;gap:9px;margin-top:14px;}
+.notes-addnote{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:var(--card-hi);border:1px solid var(--line);color:var(--text);border-radius:11px;padding:12px;font-size:13.5px;font-weight:500;cursor:pointer;transition:.13s;}
+.notes-addnote svg{width:15px;height:15px;}
+.notes-addnote:hover{border-color:var(--accent-dim);}
+/* Notiz-Detail */
+.note-detail{display:flex;flex-direction:column;gap:14px;}
+.note-title-in{width:100%;box-sizing:border-box;background:none;border:none;border-bottom:1px solid var(--line);color:var(--text);font-family:'Bricolage Grotesque';font-weight:800;font-size:22px;letter-spacing:-.5px;padding:4px 0 10px;outline:none;}
+.note-title-in:focus{border-color:var(--accent-dim);}
+.note-body-in{width:100%;box-sizing:border-box;min-height:300px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;color:var(--text);font-size:15px;line-height:1.6;outline:none;resize:vertical;font-family:inherit;}
+.note-body-in:focus{border-color:var(--accent-dim);}
+.note-check-list{display:flex;flex-direction:column;gap:8px;}
+.note-check-row{display:flex;align-items:center;gap:10px;}
+.note-check-box{width:24px;height:24px;border-radius:7px;border:1.8px solid var(--line);background:none;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;transition:.13s;}
+.note-check-box.on{background:var(--on);border-color:var(--on);}
+.note-check-box svg{width:14px;height:14px;}
+.note-check-text{flex:1;background:none;border:none;border-bottom:1px solid transparent;color:var(--text);font-size:15px;padding:6px 2px;outline:none;transition:.13s;}
+.note-check-text:focus{border-bottom-color:var(--accent-dim);}
+.note-check-text.done{text-decoration:line-through;color:var(--faint);}
+.note-check-del{background:none;border:none;color:var(--faint);cursor:pointer;padding:4px;flex-shrink:0;display:flex;transition:.13s;}
+.note-check-del svg{width:14px;height:14px;}
+.note-check-del:hover{color:var(--p1);}
+.note-additem{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;background:none;border:1px dashed var(--line);color:var(--muted);border-radius:10px;padding:11px;font-size:13.5px;cursor:pointer;transition:.13s;}
+.note-additem svg{width:15px;height:15px;}
+.note-additem:hover{border-color:var(--accent-dim);color:var(--text);}
+.note-delete{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:none;border:1px solid var(--line);color:var(--faint);border-radius:11px;padding:12px;font-size:13.5px;cursor:pointer;margin-top:8px;transition:.13s;}
+.note-delete svg{width:15px;height:15px;}
+.note-delete:hover{border-color:rgba(255,93,77,.4);color:var(--p1);}
+
 /* ── Sport ── */
 .sport-week{display:flex;flex-direction:column;gap:9px;}
 .sport-daycard{display:flex;align-items:center;justify-content:space-between;width:100%;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px 15px;cursor:pointer;transition:.14s;text-align:left;border-left:3px solid var(--line);}
@@ -442,6 +488,20 @@ body.dnd-active .sport-ex{user-select:none;-webkit-user-select:none;}
 .nutri-meal.done .nutri-meal-name{text-decoration:line-through;}
 .nutri-meal-vals{font-family:'JetBrains Mono';font-size:12px;color:var(--muted);margin-top:2px;}
 .nutri-sum{text-align:center;font-size:13.5px;color:var(--muted);margin-top:16px;padding:13px;background:var(--card-hi);border-radius:11px;}
+/* Einkaufslisten-Button + Sheet */
+.nutri-shop-btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;background:var(--accent);color:#10100c;border:none;border-radius:12px;padding:13px;font-size:14.5px;font-weight:600;cursor:pointer;margin-bottom:16px;transition:.13s;}
+.nutri-shop-btn svg{width:18px;height:18px;}
+.nutri-shop-btn:active{transform:scale(.98);}
+.shop-note{background:rgba(109,180,214,.07);border:1px solid rgba(109,180,214,.22);border-radius:11px;padding:12px 14px;font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:16px;}
+.shop-cat{margin-bottom:18px;}
+.shop-cat-h{font-family:'JetBrains Mono';font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--accent-dim);margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid var(--line);}
+.shop-item{display:flex;align-items:center;gap:11px;padding:9px 4px;cursor:pointer;border-radius:8px;transition:.1s;}
+.shop-item:hover{background:var(--card-hi);}
+.shop-check{width:20px;height:20px;flex-shrink:0;accent-color:var(--on);cursor:pointer;}
+.shop-artikel{flex:1;font-size:14.5px;color:var(--text);}
+.shop-check:checked ~ .shop-artikel{text-decoration:line-through;color:var(--faint);}
+.shop-menge{font-family:'JetBrains Mono';font-size:12.5px;color:var(--muted);background:var(--card-hi);padding:3px 9px;border-radius:7px;}
+.shop-empty{text-align:center;color:var(--muted);font-size:14px;line-height:1.5;padding:20px;}
 .nutri-sum b{color:var(--text);}
 /* Rezept-Sheet */
 .recipe-vals{display:flex;gap:10px;margin-bottom:8px;}
@@ -716,6 +776,10 @@ let FOKUS_AREA = null;   // offener Fokus-Bereich: null (Übersicht) | 'sport'
 let SPORT_TAB = 'plan';  // Sport-Unteransicht: 'plan' | 'gewicht' | 'essen'
 let SPORT_DAY = null;    // aktuell geöffneter Trainingstag-Index oder null
 let NUTRI_DAY = null;    // aktuell geöffneter Ernährungstag-Index oder null
+let NOTES = [];          // Notizen (eigener Datensatz, _kind:"note")
+let NOTE_AREAS = [];     // Bereichs-Namen (auch leere), via _kind:"notearea" gespeichert
+let NOTE_AREA = null;    // offener Notizen-Bereich (Name) oder null (Bereichs-Übersicht)
+let NOTE_OPEN = null;    // aktuell geöffnete Notiz-ID oder null
 let NAME  = localStorage.getItem('pilot.name') || '';
 let VIEW  = 'overview';  // Hauptnavigation: overview | sport | links | trash | settings
 let USER  = null;
@@ -949,6 +1013,8 @@ const IC = {
   link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
   dumbbell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>',
   bullseye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+  cart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>',
+  note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>',
   activity:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
   grip:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
   image:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
@@ -1092,7 +1158,7 @@ function uid(){ return Date.now()+""+Math.random().toString(36).slice(2,6); }
 async function cloudLoadAll(){
   const { data, error } = await sb.from('tasks').select('id,data,trashed');
   if (error) throw error;
-  const active = [], trash = [], links = [], weights = [];
+  const active = [], trash = [], links = [], weights = [], notes = [], noteAreas = [];
   let workout = null;
   (data||[]).forEach(row => {
     const obj = row.data || {};
@@ -1100,12 +1166,15 @@ async function cloudLoadAll(){
     if (obj._kind === 'link'){ links.push(obj); return; }     // Links separat
     if (obj._kind === 'workout'){ workout = obj; return; }     // Trainingsplan
     if (obj._kind === 'weight'){ weights.push(obj); return; }  // Gewichtseinträge
+    if (obj._kind === 'note'){ notes.push(obj); return; }      // Notizen
+    if (obj._kind === 'notearea'){ noteAreas.push(obj); return; } // Notiz-Bereiche
     if (row.trashed) trash.push(obj); else active.push(obj);
   });
   trash.sort((a,b) => (b.deletedAt||0) - (a.deletedAt||0));
   links.sort((a,b) => (b.fav?1:0)-(a.fav?1:0) || (a.createdAt||0)-(b.createdAt||0));
   weights.sort((a,b) => (a.date||0) - (b.date||0));
-  return { active, trash, links, workout, weights };
+  notes.sort((a,b) => (b.updatedAt||0) - (a.updatedAt||0));
+  return { active, trash, links, workout, weights, notes, noteAreas };
 }
 async function cloudUpsert(obj, trashed){
   const { id, ...rest } = obj;
@@ -1223,8 +1292,10 @@ async function onLoggedIn(session){
   $('login').style.display = 'none';
   $('boot').style.display = 'flex';
   try {
-    const { active, trash, links, workout, weights } = await cloudLoadAll();
+    const { active, trash, links, workout, weights, notes, noteAreas } = await cloudLoadAll();
     TASKS = active; TRASH = trash; LINKS = links; WEIGHTS = weights;
+    NOTES = notes || [];
+    NOTE_AREAS = (noteAreas || []);  // Objekte {id, name, ...}
     if (workout){
       WORKOUT = migrateWorkout(workout);
     } else {
@@ -1722,6 +1793,145 @@ function renderLinks(){
   return h;
 }
 
+/* ═══════════════ NOTIZEN (Bereiche → Notizen → Detail) ═══════════════ */
+
+// Alle Bereichsnamen: explizit angelegte + aus vorhandenen Notizen abgeleitete
+function allNoteAreas(){
+  const set = new Set(NOTE_AREAS.map(a => a.name).filter(Boolean));
+  NOTES.forEach(n => { if (n.area) set.add(n.area); });
+  return Array.from(set).sort((a,b)=>a.localeCompare(b));
+}
+function notesInArea(area){
+  return NOTES.filter(n => n.area === area).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+}
+
+function renderNotes(){
+  // Ebene 3: einzelne Notiz offen
+  if (NOTE_OPEN){
+    const note = NOTES.find(n => n.id === NOTE_OPEN);
+    if (note) return renderNoteDetail(note);
+    NOTE_OPEN = null;
+  }
+  // Ebene 2: Bereich offen → Notizliste
+  if (NOTE_AREA){
+    return renderNoteArea(NOTE_AREA);
+  }
+  // Ebene 1: Bereichs-Übersicht
+  const areas = allNoteAreas();
+  let h = '';
+  if (!areas.length){
+    h += `<div class="notes-empty">Noch keine Bereiche. Leg deinen ersten an — z. B. Arbeit, Studium, Privat oder Sport.</div>`;
+  } else {
+    h += `<div class="fokus-grid">`;
+    areas.forEach(area => {
+      const cnt = notesInArea(area).length;
+      h += `<button class="fokus-card" data-notearea="${esc(area)}">
+        <span class="fokus-card-ic">${IC.note}</span>
+        <span class="fokus-card-txt">
+          <span class="fokus-card-title">${esc(area)}</span>
+          <span class="fokus-card-desc">${cnt} ${cnt===1?'Notiz':'Notizen'}</span>
+        </span>
+        <span class="fokus-card-arrow">${IC.chevRight}</span>
+      </button>`;
+    });
+    h += `</div>`;
+  }
+  h += `<button class="notes-addarea" data-noteareaadd="1">${IC.plus} Bereich anlegen</button>`;
+  return h;
+}
+
+function renderNoteArea(area){
+  const notes = notesInArea(area);
+  let h = `<button class="fokus-back" data-noteback="1">${IC.chevLeft} Alle Bereiche</button>`;
+  h += `<div class="notes-area-head"><div class="notes-area-title">${esc(area)}</div>
+    <button class="notes-area-del" data-noteareadel="${esc(area)}" aria-label="Bereich löschen">${IC.trash2}</button></div>`;
+  if (!notes.length){
+    h += `<div class="notes-empty">Noch keine Notizen in „${esc(area)}". Leg unten die erste an.</div>`;
+  } else {
+    h += `<div class="notes-list">`;
+    notes.forEach(n => {
+      const preview = n.type === 'checklist'
+        ? `${(n.items||[]).filter(i=>i.done).length}/${(n.items||[]).length} erledigt`
+        : (n.body || '').replace(/\n/g,' ').slice(0,80) || 'Leer';
+      h += `<button class="note-card" data-noteopen="${esc(n.id)}">
+        <div class="note-card-top">
+          <span class="note-card-icon">${n.type==='checklist'?IC.check_sm:IC.note}</span>
+          <span class="note-card-title">${esc(n.title||'Ohne Titel')}</span>
+        </div>
+        <div class="note-card-preview">${esc(preview)}</div>
+      </button>`;
+    });
+    h += `</div>`;
+  }
+  h += `<div class="notes-add-row">
+    <button class="notes-addnote" data-noteadd="${esc(area)}:text">${IC.plus} Notiz</button>
+    <button class="notes-addnote" data-noteadd="${esc(area)}:checklist">${IC.check_sm} Checkliste</button>
+  </div>`;
+  return h;
+}
+
+function renderNoteDetail(note){
+  let h = `<button class="fokus-back" data-noteback="1">${IC.chevLeft} ${esc(note.area)}</button>`;
+  h += `<div class="note-detail">
+    <input class="note-title-in" id="noteTitle" value="${esc(note.title||'')}" placeholder="Titel">`;
+  if (note.type === 'checklist'){
+    h += `<div class="note-check-list" id="noteCheckList">`;
+    (note.items||[]).forEach((it, idx) => {
+      h += `<div class="note-check-row" data-noteitemidx="${idx}">
+        <button class="note-check-box ${it.done?'on':''}" data-notetoggle="${idx}" aria-label="Abhaken">${it.done?IC.check_sm:''}</button>
+        <input class="note-check-text ${it.done?'done':''}" data-noteitemtext="${idx}" value="${esc(it.text||'')}" placeholder="Eintrag…">
+        <button class="note-check-del" data-noteitemdel="${idx}" aria-label="Löschen">${IC.x}</button>
+      </div>`;
+    });
+    h += `</div>`;
+    h += `<button class="note-additem" data-noteitemadd="1">${IC.plus} Eintrag</button>`;
+  } else {
+    h += `<textarea class="note-body-in" id="noteBody" placeholder="Schreib los…">${esc(note.body||'')}</textarea>`;
+  }
+  h += `<button class="note-delete" data-notedelete="${esc(note.id)}">${IC.trash}Notiz löschen</button>`;
+  h += `</div>`;
+  return h;
+}
+
+/* ── Notizen: Speicher-Helper ── */
+function noteAreaAdd(name){
+  name = (name||'').trim();
+  if (!name) return;
+  if (allNoteAreas().includes(name)){ showToast('Bereich existiert schon'); return; }
+  const obj = { _kind:'notearea', id:'notearea-'+uid(), name, createdAt:Date.now() };
+  NOTE_AREAS.push(obj);
+  pushUpsert(obj, false);
+}
+function noteAreaDelete(name){
+  // Alle Notizen des Bereichs löschen
+  const toDelete = NOTES.filter(n => n.area === name);
+  NOTES = NOTES.filter(n => n.area !== name);
+  toDelete.forEach(n => cloudDelete(n.id).catch(()=>{}));
+  // Bereichs-Datensatz(e) mit diesem Namen löschen
+  const areaObjs = NOTE_AREAS.filter(a => a.name === name);
+  NOTE_AREAS = NOTE_AREAS.filter(a => a.name !== name);
+  areaObjs.forEach(a => cloudDelete(a.id).catch(()=>{}));
+}
+function noteCreate(area, type){
+  const note = {
+    _kind:'note', id:'note-'+uid(), area, type,
+    title:'', body: type==='text' ? '' : undefined,
+    items: type==='checklist' ? [] : undefined,
+    createdAt:Date.now(), updatedAt:Date.now(),
+  };
+  NOTES.unshift(note);
+  pushUpsert(note, false);
+  return note;
+}
+function noteSave(note){
+  note.updatedAt = Date.now();
+  pushUpsert(note, false);
+}
+function noteDelete(id){
+  NOTES = NOTES.filter(n => n.id !== id);
+  cloudDelete(id).catch(()=>{});
+}
+
 /* ═══════════════ FOKUS (Container für langfristige Bereiche) ═══════════════ */
 
 function renderFokus(){
@@ -1926,6 +2136,7 @@ function renderSportFood(){
     </div>
     <div class="nutri-goal-hint">Grober Richtwert, keine ärztliche Vorgabe — bei Bedarf mit Fachperson abstimmen.</div>
   </div>`;
+  h += `<button class="nutri-shop-btn" data-nutrishop="1">${IC.cart||IC.list} Einkaufsliste für die Woche</button>`;
   h += `<div class="sport-week">`;
   WD_CAL.forEach((wd, i) => {
     const day = n.week[i];
@@ -2010,6 +2221,108 @@ function renderNutriDay(i){
   return h;
 }
 
+/* ── Einkaufsliste für die Woche ──
+   Sammelt die Zutaten der GEWÄHLTEN Option pro Tag, fasst gleiche zusammen
+   (mit Mengen-Summe wo Einheit erkennbar) und sortiert nach Lidl-Abteilungen. */
+
+// Lidl-Abteilungs-Zuordnung per Stichwort (für übersichtliches Einkaufen)
+const LIDL_KATEGORIEN = [
+  { kat:'Obst & Gemüse', keys:['banane','beeren','brokkoli','paprika','tomate','spinat','zwiebel','kartoffel','pilz','zitrone','avocado','kiwi','ananas','kaisergemüse','blattspinat'] },
+  { kat:'Kühlregal (Molkerei & Eier)', keys:['magerquark','quark','skyr','milch','frischkäse','eier','joghurt','butter'] },
+  { kat:'Fleisch & Fisch', keys:['hähnchen','hackfleisch','hack','thunfisch','lachs','garnelen','pute'] },
+  { kat:'Trockenwaren & Vorrat', keys:['haferflocken','reis','nudeln','vollkornnudeln','dinkelnudeln','buchweizen','eiweißbrot','linsen','proteinpulver','scoop','erdnussbutter','honig','öl','olivenöl','nüsse','mandeln','sojasauce','kräuter','gewürz','wasser','kaffee'] },
+];
+function lidlKategorie(name){
+  const low = name.toLowerCase();
+  for (const g of LIDL_KATEGORIEN){
+    if (g.keys.some(k => low.includes(k))) return g.kat;
+  }
+  return 'Sonstiges';
+}
+/* Zerlegt "180 g Hähnchenbrust" in {menge:180, einheit:'g', artikel:'Hähnchenbrust'}.
+   Erkennt g, ml, Stück/Dose/Scoop/EL etc. Wenn keine Menge erkennbar: menge null. */
+function parseZutat(z){
+  const m = z.match(/^(\d+(?:[.,]\d+)?)\s*(g|kg|ml|l|el|tl|scoop|dose|dosen|stück|stk|prise)?\s*(.*)$/i);
+  if (m && m[1]){
+    return { menge: parseFloat(m[1].replace(',','.')), einheit:(m[2]||'').toLowerCase(), artikel:(m[3]||z).trim() };
+  }
+  return { menge:null, einheit:'', artikel:z.trim() };
+}
+/* Sammelt alle Zutaten der Woche zusammengefasst. */
+function buildShoppingList(){
+  const n = getNutrition();
+  const map = {};   // key = artikel+einheit → {menge, einheit, artikel, count}
+  WD_CAL.forEach((wd, i) => {
+    const choice = n.chosen[dateKeyForWeekday(i)] || 'a';
+    const plan = n.week[i][choice];
+    Object.values(plan.meals).forEach(rid => {
+      if (!rid || !n.recipes[rid]) return;
+      (n.recipes[rid].ing || []).forEach(z => {
+        const p = parseZutat(z);
+        const key = (p.artikel + '|' + p.einheit).toLowerCase();
+        if (!map[key]) map[key] = { menge:0, hasMenge:false, einheit:p.einheit, artikel:p.artikel, count:0 };
+        map[key].count++;
+        if (p.menge != null){ map[key].menge += p.menge; map[key].hasMenge = true; }
+      });
+    });
+  });
+  // Nach Lidl-Kategorie gruppieren
+  const grouped = {};
+  Object.values(map).forEach(item => {
+    const kat = lidlKategorie(item.artikel);
+    if (!grouped[kat]) grouped[kat] = [];
+    grouped[kat].push(item);
+  });
+  return grouped;
+}
+function formatShoppingItem(item){
+  // Menge hübsch: g→kg ab 1000, ml→l ab 1000
+  let mengeStr = '';
+  if (item.hasMenge && item.menge > 0){
+    let m = item.menge, e = item.einheit;
+    if (e === 'g' && m >= 1000){ m = m/1000; e = 'kg'; }
+    if (e === 'ml' && m >= 1000){ m = m/1000; e = 'l'; }
+    const mClean = Math.round(m*100)/100;
+    mengeStr = `${mClean}${e ? ' '+e : ''}`;
+  } else if (item.count > 1){
+    mengeStr = `${item.count}×`;
+  }
+  return { artikel: item.artikel, menge: mengeStr };
+}
+
+function openShoppingSheet(){
+  const grouped = buildShoppingList();
+  // Kategorien in sinnvoller Einkaufs-Reihenfolge
+  const order = ['Obst & Gemüse','Kühlregal (Molkerei & Eier)','Fleisch & Fisch','Trockenwaren & Vorrat','Sonstiges'];
+  let body = '';
+  order.forEach(kat => {
+    if (!grouped[kat] || !grouped[kat].length) return;
+    const items = grouped[kat].slice().sort((a,b)=>a.artikel.localeCompare(b.artikel));
+    body += `<div class="shop-cat"><div class="shop-cat-h">${esc(kat)}</div>`;
+    items.forEach(it => {
+      const f = formatShoppingItem(it);
+      body += `<label class="shop-item"><input type="checkbox" class="shop-check"><span class="shop-artikel">${esc(f.artikel)}</span>${f.menge?`<span class="shop-menge">${esc(f.menge)}</span>`:''}</label>`;
+    });
+    body += `</div>`;
+  });
+  if (!body) body = `<div class="shop-empty">Noch keine Mahlzeiten im Wochenplan — leg im Essen-Bereich Optionen fest, dann erscheint hier die Liste.</div>`;
+
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  ov.innerHTML = `<div class="sheet" id="sportSheetInner">
+    <div class="sheet-head"><div class="sheet-title">Einkaufsliste · Woche</div><button class="sheet-x" id="sportClose">${IC.x}</button></div>
+    <div class="sheet-body">
+      <div class="shop-note">Sortiert nach Lidl-Abteilungen. Mengen sind grobe Summen aus deinem Wochenplan — beim Einkauf je nach Packungsgröße runden. Häkchen sind nur zum Abhaken im Laden (werden nicht gespeichert).</div>
+      ${body}
+    </div>
+  </div>`;
+  ov.onmousedown = e => { if (e.target === ov) closeSportSheet(); };
+  document.body.appendChild(ov);
+  sportSheetEl = ov;
+  enhanceNumberInputs(ov);
+  $('sportClose').onclick = closeSportSheet;
+}
+
 function renderSettings(){
   return `<div class="settings">
     <div class="sec-lbl">Profil</div>
@@ -2042,11 +2355,12 @@ const NAV = [
   { id:'overview', label:'Übersicht',     icon:'sun'      },
   { id:'fokus',    label:'Fokus',         icon:'bullseye' },
   { id:'links',    label:'Links',         icon:'link'     },
+  { id:'notes',    label:'Notizen',       icon:'note'     },
   { id:'trash',    label:'Papierkorb',    icon:'trash'    },
   { id:'settings', label:'Einstellungen', icon:'gear'     },
 ];
-// Bottom-Nav am Handy: alle fünf (5 ist die Grenze, passt)
-const BOTNAV = ['overview','fokus','links','trash','settings'];
+// Bottom-Nav am Handy: fünf (Papierkorb ausgelassen, via Einstellungen erreichbar)
+const BOTNAV = ['overview','fokus','links','notes','settings'];
 
 function navBadge(id){
   if (id === 'trash' && TRASH.length) return `<span class="nav-badge">${TRASH.length}</span>`;
@@ -2168,6 +2482,10 @@ function render(){
     h += pageHead('Links', 'Deine wichtigsten Webseiten — ein Tipp und du bist da.');
     h += renderLinks();
   }
+  else if (VIEW === 'notes'){
+    h += pageHead('Notizen', 'Deine Gedanken und Listen — frei nach Bereichen sortiert.');
+    h += renderNotes();
+  }
   else if (VIEW === 'trash'){
     h += pageHead('Papierkorb', 'Gelöschte Aufgaben landen hier — nichts geht sofort verloren.');
     h += renderTrash();
@@ -2261,6 +2579,71 @@ function bindRoot(){
   document.querySelectorAll('[data-reciperid]').forEach(b => b.onclick = () => openRecipeSheet(b.dataset.reciperid));
   const nGoal = document.querySelector('[data-nutrigoaledit]');
   if (nGoal) nGoal.onclick = () => openGoalSheet();
+  const nShop = document.querySelector('[data-nutrishop]');
+  if (nShop) nShop.onclick = () => openShoppingSheet();
+
+  // ── Notizen-Handler ──
+  // Bereiche
+  document.querySelectorAll('[data-notearea]').forEach(b => b.onclick = () => { NOTE_AREA = b.dataset.notearea; NOTE_OPEN = null; render(); window.scrollTo(0,0); });
+  const noteBack = document.querySelector('[data-noteback]');
+  if (noteBack) noteBack.onclick = () => {
+    if (NOTE_OPEN){ NOTE_OPEN = null; } else { NOTE_AREA = null; }
+    render(); window.scrollTo(0,0);
+  };
+  const areaAdd = document.querySelector('[data-noteareaadd]');
+  if (areaAdd) areaAdd.onclick = () => {
+    const name = prompt('Name des neuen Bereichs (z. B. Arbeit, Studium, Privat):');
+    if (name && name.trim()){ noteAreaAdd(name); render(); }
+  };
+  const areaDel = document.querySelector('[data-noteareadel]');
+  if (areaDel) areaDel.onclick = () => {
+    const area = areaDel.dataset.noteareadel;
+    const cnt = notesInArea(area).length;
+    if (confirm(`Bereich „${area}"${cnt?` mit ${cnt} Notiz(en)`:''} wirklich löschen?`)){
+      noteAreaDelete(area); NOTE_AREA = null; render();
+    }
+  };
+  // Notizen anlegen/öffnen
+  document.querySelectorAll('[data-noteadd]').forEach(b => b.onclick = () => {
+    const [area, type] = b.dataset.noteadd.split(':');
+    const note = noteCreate(area, type);
+    NOTE_OPEN = note.id; render(); window.scrollTo(0,0);
+  });
+  document.querySelectorAll('[data-noteopen]').forEach(b => b.onclick = () => { NOTE_OPEN = b.dataset.noteopen; render(); window.scrollTo(0,0); });
+  // Notiz-Detail: Titel + Body live speichern
+  const nt = $('noteTitle');
+  if (nt) nt.oninput = () => { const n = NOTES.find(x=>x.id===NOTE_OPEN); if (n){ n.title = nt.value; noteSave(n); } };
+  const nb = $('noteBody');
+  if (nb) nb.oninput = () => { const n = NOTES.find(x=>x.id===NOTE_OPEN); if (n){ n.body = nb.value; noteSave(n); } };
+  // Checklisten-Items
+  document.querySelectorAll('[data-notetoggle]').forEach(b => b.onclick = () => {
+    const idx = +b.dataset.notetoggle;
+    const n = NOTES.find(x=>x.id===NOTE_OPEN);
+    if (n && n.items[idx]){ n.items[idx].done = !n.items[idx].done; noteSave(n); render(); }
+  });
+  document.querySelectorAll('[data-noteitemtext]').forEach(inp => inp.oninput = () => {
+    const idx = +inp.dataset.noteitemtext;
+    const n = NOTES.find(x=>x.id===NOTE_OPEN);
+    if (n && n.items[idx]){ n.items[idx].text = inp.value; noteSave(n); }
+  });
+  document.querySelectorAll('[data-noteitemdel]').forEach(b => b.onclick = () => {
+    const idx = +b.dataset.noteitemdel;
+    const n = NOTES.find(x=>x.id===NOTE_OPEN);
+    if (n){ n.items.splice(idx,1); noteSave(n); render(); }
+  });
+  const itemAdd = document.querySelector('[data-noteitemadd]');
+  if (itemAdd) itemAdd.onclick = () => {
+    const n = NOTES.find(x=>x.id===NOTE_OPEN);
+    if (n){ if (!n.items) n.items=[]; n.items.push({text:'',done:false}); noteSave(n); render();
+      setTimeout(()=>{ const inputs = document.querySelectorAll('[data-noteitemtext]'); const last = inputs[inputs.length-1]; if (last) last.focus(); }, 50);
+    }
+  };
+  const noteDel = document.querySelector('[data-notedelete]');
+  if (noteDel) noteDel.onclick = () => {
+    if (confirm('Diese Notiz wirklich löschen?')){
+      noteDelete(noteDel.dataset.notedelete); NOTE_OPEN = null; render();
+    }
+  };
 
   const openTrash = $('openTrashBtn');
   if (openTrash) openTrash.onclick = () => { VIEW = 'trash'; render(); window.scrollTo(0,0); };
