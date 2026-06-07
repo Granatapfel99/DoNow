@@ -1791,7 +1791,7 @@ function renderAreas(active){
     cats.forEach((c,i) => {
       const m = map[c] || { count:0, minutes:0 };
       const hue = (i*67) % 360;   // jedem Bereich eine eigene, dezente Farbe
-      h += `<div class="area-card" data-areaopen="${esc(c)}">
+      h += `<div class="area-card" data-catfilter="${esc(c)}">
         <div class="area-bar" style="background:hsl(${hue} 55% 60%)"></div>
         <div class="area-main">
           <div class="area-name">${esc(c)}</div>
@@ -1806,7 +1806,7 @@ function renderAreas(active){
     // "Ohne Bereich" als nicht-editierbare Karte, falls vorhanden
     if (map["__none__"]){
       const m = map["__none__"];
-      h += `<div class="area-card muted" data-areaopen="__none__">
+      h += `<div class="area-card muted" data-catfilter="__none__">
         <div class="area-bar" style="background:var(--faint)"></div>
         <div class="area-main"><div class="area-name">Ohne Bereich</div><div class="area-stats">${m.count} ${m.count===1?'Aufgabe':'Aufgaben'}${m.minutes?` · ~${fmtTime(m.minutes)}`:''}</div></div>
       </div>`;
@@ -2629,7 +2629,13 @@ function bindRoot(){
   document.querySelectorAll('[data-ov]').forEach(b => b.onclick = () => { AREA_FILTER = null; OV_MODE = b.dataset.ov; render(); });
 
   // ── Bereiche-Navigation ──
-  document.querySelectorAll('[data-areaopen]').forEach(b => b.onclick = () => { AREA_OPEN = b.dataset.areaopen; AREA_TAB = 'notes'; NOTE_OPEN = null; SPORT_TAB = 'plan'; SPORT_DAY = null; render(); window.scrollTo(0,0); });
+  document.querySelectorAll('[data-areaopen]').forEach(b => b.onclick = () => {
+    AREA_OPEN = b.dataset.areaopen;
+    const a = areaById(AREA_OPEN);
+    AREA_TAB = (a && a.hasTools) ? 'tools' : 'notes';   // Bereiche mit Tools (Sport) starten dort
+    NOTE_OPEN = null; SPORT_TAB = 'plan'; SPORT_DAY = null;
+    render(); window.scrollTo(0,0);
+  });
   const aBack = document.querySelector('[data-areaback]');
   if (aBack) aBack.onclick = () => { AREA_OPEN = null; SPORT_DAY = null; render(); window.scrollTo(0,0); };
   document.querySelectorAll('[data-areatab]').forEach(b => b.onclick = () => { AREA_TAB = b.dataset.areatab; SPORT_DAY = null; render(); window.scrollTo(0,0); });
@@ -2828,10 +2834,10 @@ function bindRoot(){
   const et = document.querySelector('[data-emptytrash]');
   if (et) et.onclick = () => { if (confirm("Papierkorb wirklich leeren?")) emptyTrash(); };
 
-  // Bereiche
-  document.querySelectorAll('[data-areaopen]').forEach(b => b.onclick = e => {
+  // Übersicht: Kategorie-Filter (eigener Attributname, nicht mit Bereichen verwechseln)
+  document.querySelectorAll('[data-catfilter]').forEach(b => b.onclick = e => {
     if (e.target.closest('.area-actions')) return;   // Klick auf Edit/Delete nicht als Öffnen werten
-    AREA_FILTER = b.dataset.areaopen; OV_MODE = 'all'; VIEW = 'overview'; render();
+    AREA_FILTER = b.dataset.catfilter; OV_MODE = 'all'; VIEW = 'overview'; render();
   });
   document.querySelectorAll('[data-arearename]').forEach(b => b.onclick = e => { e.stopPropagation(); renameArea(b.dataset.arearename); });
   document.querySelectorAll('[data-areadelete]').forEach(b => b.onclick = e => { e.stopPropagation(); deleteArea(b.dataset.areadelete); });
