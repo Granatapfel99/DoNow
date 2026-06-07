@@ -359,6 +359,26 @@ svg{width:18px;height:18px;display:block;}
 .note-delete{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:none;border:1px solid var(--line);color:var(--faint);border-radius:11px;padding:12px;font-size:13.5px;cursor:pointer;margin-top:8px;transition:.13s;}
 .note-delete svg{width:15px;height:15px;}
 .note-delete:hover{border-color:rgba(255,93,77,.4);color:var(--p1);}
+/* Dokumente */
+.docs-note{background:rgba(109,180,214,.07);border:1px solid rgba(109,180,214,.22);border-radius:12px;padding:13px 15px;font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px;}
+.docs-upload{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;background:var(--accent);color:#10100c;border:none;border-radius:12px;padding:13px;font-size:14.5px;font-weight:600;cursor:pointer;margin-bottom:16px;transition:.13s;}
+.docs-upload svg{width:17px;height:17px;}
+.docs-upload:active{transform:scale(.98);}
+.docs-list{display:flex;flex-direction:column;gap:9px;}
+.doc-card{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px;transition:.14s;}
+.doc-card:hover{border-color:#3a362e;}
+.doc-open{display:flex;align-items:center;gap:11px;flex:1;min-width:0;text-decoration:none;color:inherit;}
+.doc-icon{width:38px;height:38px;border-radius:10px;background:var(--card-hi);display:flex;align-items:center;justify-content:center;color:var(--accent-dim);flex-shrink:0;}
+.doc-icon svg{width:19px;height:19px;}
+.doc-info{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.doc-name{font-size:14.5px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.doc-meta{font-family:'JetBrains Mono';font-size:11.5px;color:var(--muted);}
+.doc-del{background:none;border:none;color:var(--faint);cursor:pointer;padding:6px;flex-shrink:0;transition:.13s;}
+.doc-del svg{width:16px;height:16px;}
+.doc-del:hover{color:var(--p1);}
+.docs-placeholder{display:flex;flex-direction:column;align-items:center;gap:10px;padding:36px 20px;color:var(--faint);text-align:center;}
+.docs-placeholder svg{width:32px;height:32px;opacity:.5;}
+.docs-placeholder span{font-size:13.5px;}
 
 /* ── Sport ── */
 .sport-week{display:flex;flex-direction:column;gap:9px;}
@@ -772,14 +792,20 @@ let TRASH = [];          // archivierte
 let LINKS = [];          // Shortcut-Sammlung (eigener Datensatz-Typ, _kind:"link")
 let WORKOUT = null;      // Trainingsplan (eigener Datensatz, _kind:"workout", feste id "workout-plan")
 let WEIGHTS = [];        // Gewichtseinträge (_kind:"weight")
-let FOKUS_AREA = null;   // offener Fokus-Bereich: null (Übersicht) | 'sport'
-let SPORT_TAB = 'plan';  // Sport-Unteransicht: 'plan' | 'gewicht' | 'essen'
+/* ── Bereiche: das Herz von DoNow (Second Brain) ──
+   Ein Bereich (_kind:"area") ist ein Lebensthema: Auto, Steuer, Sport, Studium…
+   Jeder hat Tabs: Notizen, Dokumente, optional Tools (z.B. Sport-Trainingsplan).
+   Notizen (_kind:"note") referenzieren den Bereich per areaId.
+   Der Sport-Bereich ist fest (id "area-sport", hasTools), damit Trainingsplan etc. erhalten bleibt. */
+let AREAS = [];          // Bereichs-Objekte {id, name, icon, hasTools}
+let AREA_OPEN = null;    // offener Bereich (id) oder null (Bereichs-Übersicht)
+let AREA_TAB = 'notes';  // Tab im offenen Bereich: 'notes' | 'docs' | 'tools'
+let SPORT_TAB = 'plan';  // Sport-Tools-Unteransicht: 'plan' | 'gewicht' | 'essen'
 let SPORT_DAY = null;    // aktuell geöffneter Trainingstag-Index oder null
 let NUTRI_DAY = null;    // aktuell geöffneter Ernährungstag-Index oder null
-let NOTES = [];          // Notizen (eigener Datensatz, _kind:"note")
-let NOTE_AREAS = [];     // Bereichs-Namen (auch leere), via _kind:"notearea" gespeichert
-let NOTE_AREA = null;    // offener Notizen-Bereich (Name) oder null (Bereichs-Übersicht)
+let NOTES = [];          // Notizen (_kind:"note", referenzieren areaId)
 let NOTE_OPEN = null;    // aktuell geöffnete Notiz-ID oder null
+const SPORT_AREA_ID = 'area-sport';   // feste ID des Sport-Bereichs
 let NAME  = localStorage.getItem('pilot.name') || '';
 let VIEW  = 'overview';  // Hauptnavigation: overview | sport | links | trash | settings
 let USER  = null;
@@ -904,6 +930,43 @@ function migrateWorkout(w){
   if (changed) pushUpsert(w, false);
   return w;
 }
+
+/* Sorgt dafür, dass das Bereiche-Modell konsistent ist:
+   1. Sport-Bereich existiert (fest, mit Tools)
+   2. Alte 'notearea'-Datensätze → neue 'area'-Objekte
+   3. Alte Notizen mit note.area (Name) → note.areaId (ID)
+   Idempotent. */
+function migrateAreas(legacyNoteAreas){
+  let changed = false;
+  // 1. Sport-Bereich sicherstellen
+  if (!AREAS.find(a => a.id === SPORT_AREA_ID)){
+    const sportArea = { _kind:'area', id:SPORT_AREA_ID, name:'Sport', icon:'dumbbell', hasTools:true, createdAt:Date.now() };
+    AREAS.push(sportArea);
+    pushUpsert(sportArea, false);
+    changed = true;
+  }
+  // 2. Alte notearea → area
+  (legacyNoteAreas||[]).forEach(na => {
+    if (!na.name) return;
+    let area = AREAS.find(a => a.name.toLowerCase() === na.name.toLowerCase());
+    if (!area){
+      area = { _kind:'area', id:'area-'+uid(), name:na.name, icon:'note', hasTools:false, createdAt:na.createdAt||Date.now() };
+      AREAS.push(area);
+      pushUpsert(area, false);
+    }
+    // alten notearea-Datensatz entfernen
+    cloudDelete(na.id).catch(()=>{});
+    changed = true;
+  });
+  // 3. Notizen mit Namens-Referenz auf areaId umstellen
+  NOTES.forEach(n => {
+    if (!n.areaId && n.area){
+      const area = AREAS.find(a => a.name.toLowerCase() === n.area.toLowerCase());
+      if (area){ n.areaId = area.id; delete n.area; pushUpsert(n, false); changed = true; }
+    }
+  });
+  return changed;
+}
 /* ── Ernährung: Ziele, Rezepte, Wochenpläne ──
    Philosophie wie Trainingsplan: einfach, schnell, sofort nutzbar. KEIN Kalorientracker.
    Werte sind grobe Orientierung (editierbar), KEINE ärztliche Vorgabe.
@@ -943,13 +1006,6 @@ function defaultNutrition(){
 const MEAL_LBL = { frueh:'Frühstück', mittag:'Mittag', abend:'Abend', snack:'Snack' };
 const SPORT_TYPE_LBL = { kraft:'Kraft', cardio:'Cardio', rest:'Ruhetag' };
 
-/* Fokus-Bereiche. Aktuell nur Sport aktiv; weitere ('lernen','arbeit',…) später
-   einfach hier ergänzen. 'soon:true' zeigt sie als „bald" an (nicht klickbar). */
-const FOKUS_AREAS = [
-  { id:'sport',  label:'Sport',            icon:'dumbbell', desc:'Trainingsplan, Log & Gewicht', soon:false },
-  { id:'lernen', label:'Lernen',           icon:'list',     desc:'Lernpläne & Klausurvorbereitung', soon:true },
-  { id:'arbeit', label:'Arbeit',           icon:'sun',      desc:'Projekte & Aufgaben im Job', soon:true },
-];
 const REPEATS = [["none","Nie"],["daily","Täglich"],["weekly","Wöchentlich"],["monthly","Monatlich"],["custom","Individuell…"]];
 const REPEAT_LBL = { daily:"täglich", weekly:"wöchentlich", monthly:"monatlich" };
 
@@ -1015,6 +1071,7 @@ const IC = {
   bullseye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
   cart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>',
   note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>',
+  paperclip:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>',
   activity:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
   grip:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
   image:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
@@ -1158,7 +1215,7 @@ function uid(){ return Date.now()+""+Math.random().toString(36).slice(2,6); }
 async function cloudLoadAll(){
   const { data, error } = await sb.from('tasks').select('id,data,trashed');
   if (error) throw error;
-  const active = [], trash = [], links = [], weights = [], notes = [], noteAreas = [];
+  const active = [], trash = [], links = [], weights = [], notes = [], areas = [], legacyNoteAreas = [];
   let workout = null;
   (data||[]).forEach(row => {
     const obj = row.data || {};
@@ -1167,14 +1224,15 @@ async function cloudLoadAll(){
     if (obj._kind === 'workout'){ workout = obj; return; }     // Trainingsplan
     if (obj._kind === 'weight'){ weights.push(obj); return; }  // Gewichtseinträge
     if (obj._kind === 'note'){ notes.push(obj); return; }      // Notizen
-    if (obj._kind === 'notearea'){ noteAreas.push(obj); return; } // Notiz-Bereiche
+    if (obj._kind === 'area'){ areas.push(obj); return; }      // Bereiche (neu)
+    if (obj._kind === 'notearea'){ legacyNoteAreas.push(obj); return; } // alte Notiz-Bereiche (Migration)
     if (row.trashed) trash.push(obj); else active.push(obj);
   });
   trash.sort((a,b) => (b.deletedAt||0) - (a.deletedAt||0));
   links.sort((a,b) => (b.fav?1:0)-(a.fav?1:0) || (a.createdAt||0)-(b.createdAt||0));
   weights.sort((a,b) => (a.date||0) - (b.date||0));
   notes.sort((a,b) => (b.updatedAt||0) - (a.updatedAt||0));
-  return { active, trash, links, workout, weights, notes, noteAreas };
+  return { active, trash, links, workout, weights, notes, areas, legacyNoteAreas };
 }
 async function cloudUpsert(obj, trashed){
   const { id, ...rest } = obj;
@@ -1292,10 +1350,11 @@ async function onLoggedIn(session){
   $('login').style.display = 'none';
   $('boot').style.display = 'flex';
   try {
-    const { active, trash, links, workout, weights, notes, noteAreas } = await cloudLoadAll();
+    const { active, trash, links, workout, weights, notes, areas, legacyNoteAreas } = await cloudLoadAll();
     TASKS = active; TRASH = trash; LINKS = links; WEIGHTS = weights;
     NOTES = notes || [];
-    NOTE_AREAS = (noteAreas || []);  // Objekte {id, name, ...}
+    AREAS = areas || [];
+    migrateAreas(legacyNoteAreas || []);
     if (workout){
       WORKOUT = migrateWorkout(workout);
     } else {
@@ -1793,60 +1852,89 @@ function renderLinks(){
   return h;
 }
 
-/* ═══════════════ NOTIZEN (Bereiche → Notizen → Detail) ═══════════════ */
+/* ═══════════════ BEREICHE (Second Brain: Notizen + Dokumente + Tools) ═══════════════ */
 
-// Alle Bereichsnamen: explizit angelegte + aus vorhandenen Notizen abgeleitete
-function allNoteAreas(){
-  const set = new Set(NOTE_AREAS.map(a => a.name).filter(Boolean));
-  NOTES.forEach(n => { if (n.area) set.add(n.area); });
-  return Array.from(set).sort((a,b)=>a.localeCompare(b));
+function areaById(id){ return AREAS.find(a => a.id === id); }
+function notesInAreaId(areaId){
+  return NOTES.filter(n => n.areaId === areaId).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
 }
-function notesInArea(area){
-  return NOTES.filter(n => n.area === area).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+function docsInAreaId(areaId){
+  // Dokumente liegen als Notiz-ähnliche Objekte vor (_kind:"note", type:"doc") — vorbereitet für PDF-Upload
+  return NOTES.filter(n => n.areaId === areaId && n.type === 'doc');
 }
 
-function renderNotes(){
+function renderBereiche(){
   // Ebene 3: einzelne Notiz offen
   if (NOTE_OPEN){
     const note = NOTES.find(n => n.id === NOTE_OPEN);
     if (note) return renderNoteDetail(note);
     NOTE_OPEN = null;
   }
-  // Ebene 2: Bereich offen → Notizliste
-  if (NOTE_AREA){
-    return renderNoteArea(NOTE_AREA);
+  // Ebene 2: Bereich offen → Tabs
+  if (AREA_OPEN){
+    const area = areaById(AREA_OPEN);
+    if (area) return renderAreaDetail(area);
+    AREA_OPEN = null;
   }
   // Ebene 1: Bereichs-Übersicht
-  const areas = allNoteAreas();
+  const sorted = AREAS.slice().sort((a,b)=>{
+    // Sport (hasTools) zuerst, Rest alphabetisch
+    if (a.id === SPORT_AREA_ID) return -1;
+    if (b.id === SPORT_AREA_ID) return 1;
+    return a.name.localeCompare(b.name);
+  });
   let h = '';
-  if (!areas.length){
-    h += `<div class="notes-empty">Noch keine Bereiche. Leg deinen ersten an — z. B. Arbeit, Studium, Privat oder Sport.</div>`;
+  if (!sorted.length){
+    h += `<div class="notes-empty">Noch keine Bereiche. Leg dein erstes Lebensthema an — z. B. Auto, Steuer, Studium oder Rechtsschutz.</div>`;
   } else {
     h += `<div class="fokus-grid">`;
-    areas.forEach(area => {
-      const cnt = notesInArea(area).length;
-      h += `<button class="fokus-card" data-notearea="${esc(area)}">
-        <span class="fokus-card-ic">${IC.note}</span>
+    sorted.forEach(area => {
+      const noteCnt = notesInAreaId(area.id).filter(n=>n.type!=='doc').length;
+      const docCnt = docsInAreaId(area.id).length;
+      const parts = [];
+      if (area.hasTools) parts.push('Tools');
+      parts.push(`${noteCnt} ${noteCnt===1?'Notiz':'Notizen'}`);
+      if (docCnt) parts.push(`${docCnt} Dok.`);
+      h += `<button class="fokus-card" data-areaopen="${esc(area.id)}">
+        <span class="fokus-card-ic">${IC[area.icon]||IC.note}</span>
         <span class="fokus-card-txt">
-          <span class="fokus-card-title">${esc(area)}</span>
-          <span class="fokus-card-desc">${cnt} ${cnt===1?'Notiz':'Notizen'}</span>
+          <span class="fokus-card-title">${esc(area.name)}</span>
+          <span class="fokus-card-desc">${parts.join(' · ')}</span>
         </span>
         <span class="fokus-card-arrow">${IC.chevRight}</span>
       </button>`;
     });
     h += `</div>`;
   }
-  h += `<button class="notes-addarea" data-noteareaadd="1">${IC.plus} Bereich anlegen</button>`;
+  h += `<button class="notes-addarea" data-areaadd="1">${IC.plus} Bereich anlegen</button>`;
   return h;
 }
 
-function renderNoteArea(area){
-  const notes = notesInArea(area);
-  let h = `<button class="fokus-back" data-noteback="1">${IC.chevLeft} Alle Bereiche</button>`;
-  h += `<div class="notes-area-head"><div class="notes-area-title">${esc(area)}</div>
-    <button class="notes-area-del" data-noteareadel="${esc(area)}" aria-label="Bereich löschen">${IC.trash2}</button></div>`;
+function renderAreaDetail(area){
+  let h = `<button class="fokus-back" data-areaback="1">${IC.chevLeft} Alle Bereiche</button>`;
+  h += `<div class="notes-area-head"><div class="notes-area-title">${esc(area.name)}</div>`;
+  // Sport-Bereich nicht löschbar (Kern-Feature), andere schon
+  if (area.id !== SPORT_AREA_ID){
+    h += `<button class="notes-area-del" data-areadel="${esc(area.id)}" aria-label="Bereich löschen">${IC.trash2}</button>`;
+  }
+  h += `</div>`;
+  // Tabs: Notizen / Dokumente / (Tools)
+  h += `<div class="subtabs">
+    <button class="subtab ${AREA_TAB==='notes'?'on':''}" data-areatab="notes">${IC.note}Notizen</button>
+    <button class="subtab ${AREA_TAB==='docs'?'on':''}" data-areatab="docs">${IC.cart&&IC.paperclip?IC.paperclip:IC.link}Dokumente</button>
+    ${area.hasTools?`<button class="subtab ${AREA_TAB==='tools'?'on':''}" data-areatab="tools">${IC.dumbbell}Tools</button>`:''}
+  </div>`;
+  if (AREA_TAB === 'notes')      h += renderAreaNotes(area);
+  else if (AREA_TAB === 'docs')  h += renderAreaDocs(area);
+  else if (AREA_TAB === 'tools' && area.hasTools) h += renderSport();
+  return h;
+}
+
+function renderAreaNotes(area){
+  const notes = notesInAreaId(area.id).filter(n => n.type !== 'doc');
+  let h = '';
   if (!notes.length){
-    h += `<div class="notes-empty">Noch keine Notizen in „${esc(area)}". Leg unten die erste an.</div>`;
+    h += `<div class="notes-empty">Noch keine Notizen in „${esc(area.name)}". Leg unten die erste an.</div>`;
   } else {
     h += `<div class="notes-list">`;
     notes.forEach(n => {
@@ -1864,14 +1952,44 @@ function renderNoteArea(area){
     h += `</div>`;
   }
   h += `<div class="notes-add-row">
-    <button class="notes-addnote" data-noteadd="${esc(area)}:text">${IC.plus} Notiz</button>
-    <button class="notes-addnote" data-noteadd="${esc(area)}:checklist">${IC.check_sm} Checkliste</button>
+    <button class="notes-addnote" data-noteadd="${esc(area.id)}:text">${IC.plus} Notiz</button>
+    <button class="notes-addnote" data-noteadd="${esc(area.id)}:checklist">${IC.check_sm} Checkliste</button>
   </div>`;
   return h;
 }
 
+function renderAreaDocs(area){
+  const docs = docsInAreaId(area.id);
+  let h = `<div class="docs-note">Wichtige Dokumente für „${esc(area.name)}" — Fahrzeugschein, Policen, Bescheide. PDFs und Bilder, immer dabei.</div>`;
+  h += `<button class="docs-upload" data-docupload="${esc(area.id)}">${IC.paperclip} Dokument hochladen</button>`;
+  h += `<input type="file" id="docFileInput" accept="image/*,application/pdf" style="display:none">`;
+  if (docs.length){
+    h += `<div class="docs-list">`;
+    docs.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).forEach(d => {
+      const isImg = d.docType && d.docType.startsWith('image/');
+      h += `<div class="doc-card">
+        <a class="doc-open" href="${esc(d.docUrl||'#')}" target="_blank" rel="noopener">
+          <span class="doc-icon">${isImg?IC.image:IC.paperclip}</span>
+          <span class="doc-info"><span class="doc-name">${esc(d.title||'Dokument')}</span><span class="doc-meta">${isImg?'Bild':'PDF'}${d.size?` · ${fmtSize(d.size)}`:''}</span></span>
+        </a>
+        <button class="doc-del" data-docdel="${esc(d.id)}" aria-label="Löschen">${IC.trash2}</button>
+      </div>`;
+    });
+    h += `</div>`;
+  } else {
+    h += `<div class="docs-placeholder">${IC.paperclip}<span>Noch keine Dokumente</span></div>`;
+  }
+  return h;
+}
+function fmtSize(bytes){
+  if (bytes < 1024) return bytes+' B';
+  if (bytes < 1024*1024) return Math.round(bytes/1024)+' KB';
+  return (bytes/1024/1024).toFixed(1)+' MB';
+}
+
 function renderNoteDetail(note){
-  let h = `<button class="fokus-back" data-noteback="1">${IC.chevLeft} ${esc(note.area)}</button>`;
+  const area = areaById(note.areaId);
+  let h = `<button class="fokus-back" data-noteback="1">${IC.chevLeft} ${esc(area?area.name:'Zurück')}</button>`;
   h += `<div class="note-detail">
     <input class="note-title-in" id="noteTitle" value="${esc(note.title||'')}" placeholder="Titel">`;
   if (note.type === 'checklist'){
@@ -1893,28 +2011,27 @@ function renderNoteDetail(note){
   return h;
 }
 
-/* ── Notizen: Speicher-Helper ── */
-function noteAreaAdd(name){
+/* ── Bereiche: Speicher-Helper ── */
+function areaAdd(name){
   name = (name||'').trim();
   if (!name) return;
-  if (allNoteAreas().includes(name)){ showToast('Bereich existiert schon'); return; }
-  const obj = { _kind:'notearea', id:'notearea-'+uid(), name, createdAt:Date.now() };
-  NOTE_AREAS.push(obj);
+  if (AREAS.some(a => a.name.toLowerCase() === name.toLowerCase())){ showToast('Bereich existiert schon'); return; }
+  const obj = { _kind:'area', id:'area-'+uid(), name, icon:'note', hasTools:false, createdAt:Date.now() };
+  AREAS.push(obj);
   pushUpsert(obj, false);
 }
-function noteAreaDelete(name){
-  // Alle Notizen des Bereichs löschen
-  const toDelete = NOTES.filter(n => n.area === name);
-  NOTES = NOTES.filter(n => n.area !== name);
+function areaDelete(id){
+  if (id === SPORT_AREA_ID) return;  // Sport ist fest
+  const toDelete = NOTES.filter(n => n.areaId === id);
+  NOTES = NOTES.filter(n => n.areaId !== id);
   toDelete.forEach(n => cloudDelete(n.id).catch(()=>{}));
-  // Bereichs-Datensatz(e) mit diesem Namen löschen
-  const areaObjs = NOTE_AREAS.filter(a => a.name === name);
-  NOTE_AREAS = NOTE_AREAS.filter(a => a.name !== name);
-  areaObjs.forEach(a => cloudDelete(a.id).catch(()=>{}));
+  const area = areaById(id);
+  AREAS = AREAS.filter(a => a.id !== id);
+  if (area) cloudDelete(area.id).catch(()=>{});
 }
-function noteCreate(area, type){
+function noteCreate(areaId, type){
   const note = {
-    _kind:'note', id:'note-'+uid(), area, type,
+    _kind:'note', id:'note-'+uid(), areaId, type,
     title:'', body: type==='text' ? '' : undefined,
     items: type==='checklist' ? [] : undefined,
     createdAt:Date.now(), updatedAt:Date.now(),
@@ -1923,40 +2040,49 @@ function noteCreate(area, type){
   pushUpsert(note, false);
   return note;
 }
-function noteSave(note){
-  note.updatedAt = Date.now();
-  pushUpsert(note, false);
+function noteSave(note){ note.updatedAt = Date.now(); pushUpsert(note, false); }
+function noteDelete(id){ NOTES = NOTES.filter(n => n.id !== id); cloudDelete(id).catch(()=>{}); }
+
+/* ── Dokumente: Upload zu Supabase Storage ──
+   Bucket "documents" muss in Supabase existieren (öffentlich lesbar).
+   Datei wird hochgeladen, öffentliche URL geholt, als note (type:doc) gespeichert. */
+const DOC_BUCKET = 'documents';
+async function uploadDoc(areaId, file){
+  // Größe begrenzen (10 MB), sonst sprengt es Gratis-Speicher schnell
+  if (file.size > 10*1024*1024){ showToast('Datei zu groß (max. 10 MB)'); return; }
+  if (!sb){ showToast('Keine Verbindung'); return; }
+  showToast('Lade hoch…');
+  try {
+    const ext = (file.name.split('.').pop()||'dat').toLowerCase();
+    const path = `${USER.id}/${areaId}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+    const { error: upErr } = await sb.storage.from(DOC_BUCKET).upload(path, file, { upsert:false, contentType:file.type });
+    if (upErr) throw upErr;
+    const { data:urlData } = sb.storage.from(DOC_BUCKET).getPublicUrl(path);
+    const doc = {
+      _kind:'note', id:'doc-'+uid(), areaId, type:'doc',
+      title: file.name, docUrl: urlData.publicUrl, docPath: path,
+      docType: file.type, size: file.size,
+      createdAt:Date.now(), updatedAt:Date.now(),
+    };
+    NOTES.unshift(doc);
+    pushUpsert(doc, false);
+    render();
+    showToast('Hochgeladen ✓');
+  } catch(e){
+    console.warn('Upload-Fehler:', e.message);
+    showToast('Upload fehlgeschlagen — ist der Bucket eingerichtet?');
+  }
 }
-function noteDelete(id){
+function docDelete(id){
+  const doc = NOTES.find(n => n.id === id);
   NOTES = NOTES.filter(n => n.id !== id);
   cloudDelete(id).catch(()=>{});
-}
-
-/* ═══════════════ FOKUS (Container für langfristige Bereiche) ═══════════════ */
-
-function renderFokus(){
-  // Kein Bereich gewählt → Auswahl der Fokus-Bereiche
-  if (!FOKUS_AREA){
-    let h = `<div class="fokus-grid">`;
-    FOKUS_AREAS.forEach(a => {
-      h += `<button class="fokus-card ${a.soon?'soon':''}" ${a.soon?'':`data-fokusarea="${a.id}"`}>
-        <span class="fokus-card-ic">${IC[a.icon]||IC.sun}</span>
-        <span class="fokus-card-txt">
-          <span class="fokus-card-title">${esc(a.label)}${a.soon?'<span class="fokus-soon">bald</span>':''}</span>
-          <span class="fokus-card-desc">${esc(a.desc)}</span>
-        </span>
-        ${a.soon?'':`<span class="fokus-card-arrow">${IC.chevRight}</span>`}
-      </button>`;
-    });
-    h += `</div>`;
-    return h;
+  // Datei aus Storage entfernen
+  if (doc && doc.docPath && sb){
+    sb.storage.from(DOC_BUCKET).remove([doc.docPath]).catch(()=>{});
   }
-  // Bereich gewählt → Zurück-Leiste + Bereichsinhalt
-  const area = FOKUS_AREAS.find(a => a.id === FOKUS_AREA);
-  let h = `<button class="fokus-back" data-fokusback="1">${IC.chevLeft} Fokus-Bereiche</button>`;
-  if (FOKUS_AREA === 'sport') h += renderSport();
-  return h;
 }
+
 
 /* ═══════════════ SPORT ═══════════════ */
 
@@ -2353,14 +2479,13 @@ function renderSettings(){
 // Zentrale Navigations-Definition (Reihenfolge = Anzeige). To-Dos immer zuerst.
 const NAV = [
   { id:'overview', label:'Übersicht',     icon:'sun'      },
-  { id:'fokus',    label:'Fokus',         icon:'bullseye' },
+  { id:'bereiche', label:'Bereiche',      icon:'bullseye' },
   { id:'links',    label:'Links',         icon:'link'     },
-  { id:'notes',    label:'Notizen',       icon:'note'     },
   { id:'trash',    label:'Papierkorb',    icon:'trash'    },
   { id:'settings', label:'Einstellungen', icon:'gear'     },
 ];
-// Bottom-Nav am Handy: fünf (Papierkorb ausgelassen, via Einstellungen erreichbar)
-const BOTNAV = ['overview','fokus','links','notes','settings'];
+// Bottom-Nav am Handy: alle fünf (passt)
+const BOTNAV = ['overview','bereiche','links','trash','settings'];
 
 function navBadge(id){
   if (id === 'trash' && TRASH.length) return `<span class="nav-badge">${TRASH.length}</span>`;
@@ -2474,17 +2599,13 @@ function render(){
     else if (OV_MODE === 'matrix')h += renderMatrix(act);
     else if (OV_MODE === 'areas') h += renderAreas(active);
   }
-  else if (VIEW === 'fokus'){
-    h += pageHead('Fokus', 'Deine langfristigen Ziele und Programme — Schritt für Schritt durchziehen.');
-    h += renderFokus();
+  else if (VIEW === 'bereiche'){
+    h += pageHead('Bereiche', 'Deine Lebensthemen — Notizen, Dokumente und Tools an einem Ort.');
+    h += renderBereiche();
   }
   else if (VIEW === 'links'){
     h += pageHead('Links', 'Deine wichtigsten Webseiten — ein Tipp und du bist da.');
     h += renderLinks();
-  }
-  else if (VIEW === 'notes'){
-    h += pageHead('Notizen', 'Deine Gedanken und Listen — frei nach Bereichen sortiert.');
-    h += renderNotes();
   }
   else if (VIEW === 'trash'){
     h += pageHead('Papierkorb', 'Gelöschte Aufgaben landen hier — nichts geht sofort verloren.');
@@ -2507,10 +2628,25 @@ function bindRoot(){
   // Übersicht-Filter (Heute/Alle/Matrix/Bereiche)
   document.querySelectorAll('[data-ov]').forEach(b => b.onclick = () => { AREA_FILTER = null; OV_MODE = b.dataset.ov; render(); });
 
-  // ── Fokus-Navigation ──
-  document.querySelectorAll('[data-fokusarea]').forEach(b => b.onclick = () => { FOKUS_AREA = b.dataset.fokusarea; SPORT_TAB = 'plan'; SPORT_DAY = null; render(); window.scrollTo(0,0); });
-  const fBack = document.querySelector('[data-fokusback]');
-  if (fBack) fBack.onclick = () => { FOKUS_AREA = null; SPORT_DAY = null; render(); window.scrollTo(0,0); };
+  // ── Bereiche-Navigation ──
+  document.querySelectorAll('[data-areaopen]').forEach(b => b.onclick = () => { AREA_OPEN = b.dataset.areaopen; AREA_TAB = 'notes'; NOTE_OPEN = null; SPORT_TAB = 'plan'; SPORT_DAY = null; render(); window.scrollTo(0,0); });
+  const aBack = document.querySelector('[data-areaback]');
+  if (aBack) aBack.onclick = () => { AREA_OPEN = null; SPORT_DAY = null; render(); window.scrollTo(0,0); };
+  document.querySelectorAll('[data-areatab]').forEach(b => b.onclick = () => { AREA_TAB = b.dataset.areatab; SPORT_DAY = null; render(); window.scrollTo(0,0); });
+  const aAdd = document.querySelector('[data-areaadd]');
+  if (aAdd) aAdd.onclick = () => {
+    const name = prompt('Name des neuen Bereichs (z. B. Auto, Steuer, Rechtsschutz, Studium):');
+    if (name && name.trim()){ areaAdd(name); render(); }
+  };
+  const aDel = document.querySelector('[data-areadel]');
+  if (aDel) aDel.onclick = () => {
+    const id = aDel.dataset.areadel;
+    const area = areaById(id);
+    const noteCnt = notesInAreaId(id).length;
+    if (confirm(`Bereich „${area?area.name:''}"${noteCnt?` mit ${noteCnt} Notiz(en)`:''} wirklich löschen?`)){
+      areaDelete(id); AREA_OPEN = null; render();
+    }
+  };
 
   // ── Sport-Handler ──
   document.querySelectorAll('[data-sport]').forEach(b => b.onclick = () => { SPORT_TAB = b.dataset.sport; SPORT_DAY = null; render(); window.scrollTo(0,0); });
@@ -2582,34 +2718,31 @@ function bindRoot(){
   const nShop = document.querySelector('[data-nutrishop]');
   if (nShop) nShop.onclick = () => openShoppingSheet();
 
-  // ── Notizen-Handler ──
-  // Bereiche
-  document.querySelectorAll('[data-notearea]').forEach(b => b.onclick = () => { NOTE_AREA = b.dataset.notearea; NOTE_OPEN = null; render(); window.scrollTo(0,0); });
+  // ── Notiz-Detail-Handler ──
   const noteBack = document.querySelector('[data-noteback]');
-  if (noteBack) noteBack.onclick = () => {
-    if (NOTE_OPEN){ NOTE_OPEN = null; } else { NOTE_AREA = null; }
-    render(); window.scrollTo(0,0);
-  };
-  const areaAdd = document.querySelector('[data-noteareaadd]');
-  if (areaAdd) areaAdd.onclick = () => {
-    const name = prompt('Name des neuen Bereichs (z. B. Arbeit, Studium, Privat):');
-    if (name && name.trim()){ noteAreaAdd(name); render(); }
-  };
-  const areaDel = document.querySelector('[data-noteareadel]');
-  if (areaDel) areaDel.onclick = () => {
-    const area = areaDel.dataset.noteareadel;
-    const cnt = notesInArea(area).length;
-    if (confirm(`Bereich „${area}"${cnt?` mit ${cnt} Notiz(en)`:''} wirklich löschen?`)){
-      noteAreaDelete(area); NOTE_AREA = null; render();
-    }
-  };
+  if (noteBack) noteBack.onclick = () => { NOTE_OPEN = null; render(); window.scrollTo(0,0); };
   // Notizen anlegen/öffnen
   document.querySelectorAll('[data-noteadd]').forEach(b => b.onclick = () => {
-    const [area, type] = b.dataset.noteadd.split(':');
-    const note = noteCreate(area, type);
+    const [areaId, type] = b.dataset.noteadd.split(':');
+    const note = noteCreate(areaId, type);
     NOTE_OPEN = note.id; render(); window.scrollTo(0,0);
   });
   document.querySelectorAll('[data-noteopen]').forEach(b => b.onclick = () => { NOTE_OPEN = b.dataset.noteopen; render(); window.scrollTo(0,0); });
+  // Dokumente: Upload + Löschen
+  const docUp = document.querySelector('[data-docupload]');
+  if (docUp){
+    const areaId = docUp.dataset.docupload;
+    const fileInput = $('docFileInput');
+    docUp.onclick = () => fileInput && fileInput.click();
+    if (fileInput) fileInput.onchange = async e => {
+      const file = e.target.files && e.target.files[0];
+      if (file) await uploadDoc(areaId, file);
+    };
+  }
+  document.querySelectorAll('[data-docdel]').forEach(b => b.onclick = () => {
+    const id = b.dataset.docdel;
+    if (confirm('Dieses Dokument wirklich löschen?')){ docDelete(id); render(); }
+  });
   // Notiz-Detail: Titel + Body live speichern
   const nt = $('noteTitle');
   if (nt) nt.oninput = () => { const n = NOTES.find(x=>x.id===NOTE_OPEN); if (n){ n.title = nt.value; noteSave(n); } };
