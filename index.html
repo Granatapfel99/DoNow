@@ -1013,8 +1013,8 @@ function defaultNutrition(){
   const A = (fr,mi,ab,sn) => ({ label:'Option A', meals:{ frueh:fr, mittag:mi, abend:ab, snack:sn } });
   const B = (fr,mi,ab,sn) => ({ label:'Option B', meals:{ frueh:fr, mittag:mi, abend:ab, snack:sn } });
   return {
-    _nutver: 2,   // Versionsnummer: erlaubt sauberes Aktualisieren des Pools
-    goals: { kcal:2400, protein:180, fat:75 },   // editierbare Orientierung (Standard-Richtwert)
+    _nutver: 3,   // Versionsnummer: erlaubt sauberes Aktualisieren des Pools
+    goals: { kcal:2300, protein:170, fat:70 },   // kalibrierter Startwert (Mifflin-St-Jeor, moderates Defizit)
     proteinToday: {},
     recipes,
     week: [
@@ -2311,12 +2311,15 @@ function getNutrition(){
   if (!WORKOUT.nutrition) WORKOUT.nutrition = defaultNutrition();
   const def = defaultNutrition();
   const n = WORKOUT.nutrition;
-  // Migration: neuer Rezept-Pool (v2) — Verlaufsdaten (chosen, proteinToday, goals) bleiben erhalten
+  // Migration: neuer Rezept-Pool + kalibrierte Ziele — Verlaufsdaten (chosen, proteinToday) bleiben erhalten
   if ((n._nutver || 1) < def._nutver){
     n.recipes = def.recipes;
     n.week = def.week;
+    // Ziele auf kalibrierten Startwert setzen, sofern noch auf altem Default (2400/180) oder fehlend.
+    // So überschreiben wir keine bewusst angepassten Werte.
+    const wasDefault = !n.goals || (n.goals.kcal === 2400 && n.goals.protein === 180);
+    if (wasDefault) n.goals = { ...def.goals };
     n._nutver = def._nutver;
-    // goals nur ergänzen falls fehlend, nicht überschreiben (User könnte angepasst haben)
     if (!n.goals) n.goals = def.goals;
     pushUpsert(WORKOUT, false);
   }
