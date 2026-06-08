@@ -417,9 +417,24 @@ svg{width:18px;height:18px;display:block;}
 .sport-log-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;background:var(--card-hi);border:1px solid var(--line);color:var(--text);border-radius:9px;padding:10px;font-size:13.5px;font-weight:500;cursor:pointer;margin-top:11px;transition:.13s;}
 .sport-log-btn svg{width:15px;height:15px;}
 .sport-log-btn:hover{border-color:var(--accent-dim);}
-.sport-log-list{margin-top:10px;display:flex;flex-direction:column;gap:5px;}
-.sport-log-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--muted);padding:6px 9px;background:var(--bg);border-radius:7px;font-family:'JetBrains Mono';}
-.sport-log-date{color:var(--faint);font-size:11px;}
+.sport-progress{display:flex;flex-wrap:wrap;gap:10px;margin:2px 0 10px;font-family:'JetBrains Mono';font-size:12px;}
+.prog-last{color:var(--muted);}
+.prog-best{color:var(--accent);display:inline-flex;align-items:center;gap:4px;}
+.prog-best svg{width:13px;height:13px;}
+.sport-log-row{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;font-size:12.5px;color:var(--muted);padding:8px 9px;background:var(--bg);border:1px solid transparent;border-radius:7px;font-family:'JetBrains Mono';cursor:pointer;text-align:left;transition:.12s;}
+.sport-log-row:hover{border-color:var(--line);color:var(--text);}
+.sport-log-row>span:first-child{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;}
+.sport-log-date{color:var(--faint);font-size:11px;display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.sport-log-date svg{width:12px;height:12px;opacity:.6;}
+.logset-del{background:none;border:none;color:var(--faint);cursor:pointer;padding:6px;flex-shrink:0;display:flex;transition:.12s;}
+.logset-del svg{width:14px;height:14px;}
+.logset-del:hover{color:var(--p1);}
+.logset-add{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;background:none;border:1px dashed var(--line);color:var(--muted);border-radius:10px;padding:10px;font-size:13px;cursor:pointer;margin:2px 0 6px;transition:.13s;}
+.logset-add svg{width:14px;height:14px;}
+.logset-add:hover{border-color:var(--accent-dim);color:var(--text);}
+.sheet-del-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:none;border:1px solid var(--line);color:var(--faint);border-radius:12px;padding:12px;font-size:13.5px;cursor:pointer;margin-top:10px;transition:.13s;}
+.sheet-del-btn svg{width:15px;height:15px;}
+.sheet-del-btn:hover{border-color:rgba(255,93,77,.4);color:var(--p1);}
 .sport-addex{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;background:none;border:1px dashed var(--line);color:var(--muted);border-radius:11px;padding:13px;font-size:13.5px;cursor:pointer;margin-top:12px;transition:.13s;}
 .sport-addex svg{width:15px;height:15px;}
 .sport-addex:hover{border-color:var(--accent-dim);color:var(--text);}
@@ -507,6 +522,7 @@ body.dnd-active .sport-ex{user-select:none;-webkit-user-select:none;}
 .nutri-meal-name{font-size:15.5px;font-weight:600;color:var(--text);}
 .nutri-meal.done .nutri-meal-name{text-decoration:line-through;}
 .nutri-meal-vals{font-family:'JetBrains Mono';font-size:12px;color:var(--muted);margin-top:2px;}
+.nutri-cost{color:var(--p2);font-weight:600;}
 .nutri-sum{text-align:center;font-size:13.5px;color:var(--muted);margin-top:16px;padding:13px;background:var(--card-hi);border-radius:11px;}
 /* Einkaufslisten-Button + Sheet */
 .nutri-shop-btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;background:var(--accent);color:#10100c;border:none;border-radius:12px;padding:13px;font-size:14.5px;font-weight:600;cursor:pointer;margin-bottom:16px;transition:.13s;}
@@ -972,35 +988,45 @@ function migrateAreas(legacyNoteAreas){
    Werte sind grobe Orientierung (editierbar), KEINE ärztliche Vorgabe.
    Rezepte: schnelle, günstige Studentenküche aus der Lebensmittelbasis. */
 function defaultNutrition(){
-  // Rezepte mit ID, Werten (ca.), Zutaten und max. 5 Schritten
+  // Rezepte mit ID, Werten (ca.), Zutaten und max. 5 Schritten.
+  // Fokus: günstig (Studentenbudget), alltagstauglich, hoher Protein-Anteil.
+  // €-Einordnung grob: € = sehr günstig, €€ = mittel.
   const recipes = {
-    'oats':      { name:'Protein Oats',        kcal:700, protein:45, ing:['80 g Haferflocken','300 ml Milch','1 Scoop Proteinpulver','1 Banane','1 EL Erdnussbutter'], steps:['Haferflocken mit Milch 3 Min köcheln','Vom Herd, Proteinpulver einrühren','Banane in Scheiben + Erdnussbutter drauf'] },
-    'quarkbowl': { name:'Quark Bowl',          kcal:550, protein:55, ing:['250 g Magerquark','100 g Skyr','Beeren','30 g Haferflocken','etwas Honig'], steps:['Quark & Skyr verrühren','Mit Beeren, Haferflocken und Honig toppen'] },
-    'chickrice': { name:'Chicken Rice Bowl',   kcal:850, protein:65, ing:['180 g Hähnchenbrust','100 g Reis (roh)','Paprika','Brokkoli','Sojasauce, Gewürze'], steps:['Reis nach Packung kochen','Hähnchen würfeln, scharf anbraten','Gemüse zugeben, 5 Min braten','Mit Sojasauce & Gewürzen abschmecken'] },
-    'hackpfanne':{ name:'Hackfleischpfanne',   kcal:800, protein:60, ing:['200 g Hackfleisch (mager)','200 g Kartoffeln','Zwiebel','Paprika','Gewürze'], steps:['Kartoffeln würfeln, vorkochen','Hack krümelig anbraten','Zwiebel + Paprika zugeben','Kartoffeln untermischen, würzen'] },
-    'tunapasta': { name:'Thunfisch Pasta',     kcal:700, protein:50, ing:['100 g Vollkornnudeln','1 Dose Thunfisch','100 g körniger Frischkäse','Tomaten','Kräuter'], steps:['Nudeln kochen','Thunfisch, Frischkäse & Tomaten mischen','Mit den heißen Nudeln vermengen, würzen'] },
-    'eggspot':   { name:'Eier + Kartoffeln',   kcal:650, protein:35, ing:['4 Eier','250 g Kartoffeln','Zwiebel','etwas Öl','Gewürze'], steps:['Kartoffeln in Scheiben braten','Zwiebel zugeben','Eier verquirlt darüber, stocken lassen'] },
-    'shake':     { name:'Proteinshake',        kcal:170, protein:30, ing:['30 g Proteinpulver','300 ml Wasser oder Milch'], steps:['Pulver + Flüssigkeit in den Shaker','Kräftig schütteln'] },
-    'salmonrice':{ name:'Lachs mit Reis',      kcal:800, protein:55, ing:['180 g Lachsfilet','100 g Reis (roh)','Brokkoli','Zitrone','Gewürze'], steps:['Reis kochen','Lachs würzen, 4 Min je Seite braten','Brokkoli dämpfen','Mit Zitrone servieren'] },
+    // ── Frühstück / Basis ──
+    'oats':      { name:'Protein Oats',         kcal:600, protein:40, cost:'€',  ing:['80 g Haferflocken','300 ml Milch','1 Scoop Proteinpulver','1 Banane'], steps:['Haferflocken mit Milch 3 Min köcheln','Vom Herd, Proteinpulver einrühren','Banane in Scheiben drauf'] },
+    'quarkbowl': { name:'Quark Bowl',           kcal:450, protein:55, cost:'€',  ing:['250 g Magerquark','100 g Skyr','TK-Beeren','30 g Haferflocken','etwas Honig'], steps:['Quark & Skyr verrühren','Mit etwas Milch cremig rühren','Beeren, Haferflocken & Honig toppen'] },
+    'eggsbread': { name:'Rührei + Brot',        kcal:500, protein:35, cost:'€',  ing:['4 Eier','2 Scheiben Eiweißbrot','etwas Öl','Gewürze'], steps:['Eier verquirlen, würzen','In wenig Öl stocken lassen','Mit Brot servieren'] },
+    'skyrshake': { name:'Skyr-Shake to go',     kcal:350, protein:40, cost:'€',  ing:['300 g Skyr','1 Banane','30 g Haferflocken','Wasser'], steps:['Alles in den Mixer','Mit Wasser auf Wunschkonsistenz','Mitnehmen'] },
+    // ── Hauptgerichte (günstige Proteinquellen) ──
+    'chickrice': { name:'Chicken Rice Bowl',    kcal:700, protein:55, cost:'€€', ing:['150 g Hähnchenbrust','80 g Reis (roh)','Paprika','TK-Brokkoli','Sojasauce, Gewürze'], steps:['Reis kochen','Hähnchen würfeln, scharf anbraten','Gemüse zugeben, 5 Min braten','Mit Sojasauce abschmecken'] },
+    'hackpfanne':{ name:'Hackpfanne',           kcal:700, protein:45, cost:'€€', ing:['150 g Hackfleisch (mager)','250 g Kartoffeln','Zwiebel','Paprika','Gewürze'], steps:['Kartoffeln würfeln, vorkochen','Hack krümelig anbraten','Zwiebel + Paprika zugeben','Kartoffeln untermischen, würzen'] },
+    'tunapasta': { name:'Thunfisch-Pasta',      kcal:650, protein:50, cost:'€',  ing:['100 g Vollkornnudeln','1 Dose Thunfisch','100 g körniger Frischkäse','Tomaten','Kräuter'], steps:['Nudeln kochen','Thunfisch, Frischkäse & Tomaten mischen','Mit heißen Nudeln vermengen, würzen'] },
+    'lentilcurry':{ name:'Linsen-Curry',        kcal:600, protein:30, cost:'€',  ing:['100 g rote Linsen','200 ml passierte Tomaten','Zwiebel','Reis','Gewürze (Curry)'], steps:['Zwiebel anbraten','Linsen + Tomaten + Wasser zugeben','15 Min köcheln','Mit Reis servieren'] },
+    'beanrice':  { name:'Bohnen-Reis-Pfanne',   kcal:600, protein:28, cost:'€',  ing:['1 Dose Kidneybohnen','80 g Reis (roh)','Paprika','Zwiebel','Gewürze (Paprika, Kreuzkümmel)'], steps:['Reis kochen','Zwiebel + Paprika anbraten','Bohnen zugeben, würzen','Mit Reis mischen'] },
+    'eggspot':   { name:'Bauernfrühstück',      kcal:600, protein:30, cost:'€',  ing:['4 Eier','250 g Kartoffeln','Zwiebel','etwas Öl','Gewürze'], steps:['Kartoffeln in Scheiben braten','Zwiebel zugeben','Eier verquirlt darüber, stocken lassen'] },
+    'quarkpot':  { name:'Herzhafter Quark + Kartoffeln', kcal:500, protein:45, cost:'€', ing:['250 g Magerquark','300 g Pellkartoffeln','Schnittlauch','Leinöl','Salz'], steps:['Kartoffeln kochen','Quark mit Schnittlauch, Leinöl & Salz anrühren','Zusammen servieren'] },
+    // ── Snack ──
+    'shake':     { name:'Proteinshake',         kcal:170, protein:30, cost:'€',  ing:['30 g Proteinpulver','300 ml Wasser oder Milch'], steps:['Pulver + Flüssigkeit in den Shaker','Kräftig schütteln'] },
+    'skyrsnack': { name:'Skyr + Beeren',        kcal:200, protein:20, cost:'€',  ing:['200 g Skyr','TK-Beeren','etwas Honig'], steps:['Skyr in eine Schüssel','Beeren & Honig drauf'] },
   };
-  // Zwei Tagespläne pro Wochentag (rotierend, einfach gehalten)
   const dayPlan = (a, b) => ({ a, b });
   const A = (fr,mi,ab,sn) => ({ label:'Option A', meals:{ frueh:fr, mittag:mi, abend:ab, snack:sn } });
   const B = (fr,mi,ab,sn) => ({ label:'Option B', meals:{ frueh:fr, mittag:mi, abend:ab, snack:sn } });
   return {
-    goals: { kcal:2400, protein:180, fat:75 },   // editierbare Orientierung
-    proteinToday: {},   // { 'YYYY-MM-DD': geschätzte g, abgehakte Mahlzeiten }
+    _nutver: 2,   // Versionsnummer: erlaubt sauberes Aktualisieren des Pools
+    goals: { kcal:2400, protein:180, fat:75 },   // editierbare Orientierung (Standard-Richtwert)
+    proteinToday: {},
     recipes,
     week: [
-      dayPlan(A('oats','chickrice','tunapasta','shake'),      B('quarkbowl','hackpfanne','eggspot','shake')),       // Mo
-      dayPlan(A('quarkbowl','salmonrice','hackpfanne','shake'),B('oats','chickrice','tunapasta','shake')),          // Di
-      dayPlan(A('oats','hackpfanne','tunapasta','shake'),     B('quarkbowl','chickrice','eggspot','shake')),        // Mi
-      dayPlan(A('quarkbowl','chickrice','salmonrice','shake'),B('oats','hackpfanne','tunapasta','shake')),          // Do
-      dayPlan(A('oats','salmonrice','eggspot','shake'),       B('quarkbowl','chickrice','tunapasta','shake')),      // Fr
-      dayPlan(A('oats','chickrice','hackpfanne','shake'),     B('quarkbowl','tunapasta','eggspot','shake')),        // Sa
-      dayPlan(A('quarkbowl','salmonrice','tunapasta','shake'),B('oats','hackpfanne','eggspot','shake')),            // So
+      dayPlan(A('oats','chickrice','quarkpot','shake'),       B('quarkbowl','hackpfanne','eggspot','skyrsnack')),    // Mo
+      dayPlan(A('quarkbowl','lentilcurry','tunapasta','shake'),B('oats','chickrice','eggsbread','skyrsnack')),       // Di
+      dayPlan(A('eggsbread','hackpfanne','quarkbowl','shake'), B('oats','beanrice','tunapasta','skyrsnack')),        // Mi
+      dayPlan(A('oats','chickrice','lentilcurry','shake'),    B('quarkbowl','hackpfanne','eggspot','skyrsnack')),    // Do
+      dayPlan(A('skyrshake','tunapasta','eggspot','shake'),   B('oats','chickrice','quarkpot','skyrsnack')),         // Fr
+      dayPlan(A('oats','beanrice','hackpfanne','shake'),      B('quarkbowl','tunapasta','eggspot','skyrsnack')),     // Sa
+      dayPlan(A('quarkbowl','chickrice','lentilcurry','shake'),B('oats','hackpfanne','eggsbread','skyrsnack')),      // So
     ],
-    chosen: {},   // { 'YYYY-MM-DD': 'a'|'b' } welche Option gewählt
+    chosen: {},
   };
 }
 const MEAL_LBL = { frueh:'Frühstück', mittag:'Mittag', abend:'Abend', snack:'Snack' };
@@ -1072,6 +1098,7 @@ const IC = {
   cart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>',
   note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>',
   paperclip:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>',
+  trophy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
   activity:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
   grip:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
   image:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
@@ -1340,6 +1367,7 @@ function setAuthMode(mode){
 
 async function doLogout(){
   if (sb) { try { await sb.auth.signOut(); } catch(e){} }
+  clearUIState();
   USER = null; TASKS = []; TRASH = [];
   $('app').classList.remove('shown');
   $('login').style.display = 'flex';
@@ -1369,8 +1397,19 @@ async function onLoggedIn(session){
   }
   $('boot').style.display = 'none';
   $('app').classList.add('shown');
-  VIEW = 'overview'; OV_MODE = 'today';
+  // Letzten Zustand wiederherstellen (statt immer auf Übersicht zu starten)
+  _restoringUI = true;
+  const restored = restoreUIState();
+  // Sicherheits-Check: zeigt der wiederhergestellte Zustand auf etwas Gültiges?
+  if (AREA_OPEN && !AREAS.find(a => a.id === AREA_OPEN)) AREA_OPEN = null;
+  if (NOTE_OPEN && !NOTES.find(n => n.id === NOTE_OPEN)) NOTE_OPEN = null;
+  if (!restored){ VIEW = 'overview'; OV_MODE = 'today'; }
+  _restoringUI = false;
   render();
+  // Scrollposition wiederherstellen (nach dem Rendern)
+  if (restored && restored.scrollY){
+    requestAnimationFrame(() => window.scrollTo(0, restored.scrollY));
+  }
 }
 
 /* ═══════════════ DATEN-OPERATIONEN (optimistisch + Sync) ═══════════════ */
@@ -2158,8 +2197,9 @@ function renderSportDay(i){
         <button class="sport-ex-edit" data-exedit="${i}:${j}" aria-label="Übung bearbeiten">${IC.edit}</button>
       </div>
       <div class="sport-ex-target">${targetLine}${ex.note?` · ${esc(ex.note)}`:''}</div>
+      ${!isCardio ? progressLine(ex) : ''}
       <button class="sport-log-btn" data-exlog="${i}:${j}">${IC.plus} ${isCardio?'Einheit eintragen':'Sätze eintragen'}</button>
-      ${ex.log && ex.log.length?`<div class="sport-log-list">${ex.log.slice(-5).reverse().map(l=>`<div class="sport-log-row"><span>${esc(l.text)}</span><span class="sport-log-date">${fmtLogDate(l.ts)}</span></div>`).join('')}</div>`:''}
+      ${ex.log && ex.log.length?`<div class="sport-log-list">${ex.log.slice(-5).reverse().map(l=>`<button class="sport-log-row" data-logedit="${i}:${j}:${l.ts}"><span>${esc(l.text)}</span><span class="sport-log-date">${fmtLogDate(l.ts)} ${IC.edit}</span></button>`).join('')}</div>`:''}
     </div>`;
   });
   h += `</div>`;
@@ -2175,6 +2215,37 @@ function fmtLogDate(ts){
   if (diff<7) return `vor ${diff}d`;
   return `${d.getDate()}.${d.getMonth()+1}.`;
 }
+
+/* Fortschritts-Zeile für Kraftübungen: "Letztes 70×8 · Best 75×6".
+   Bestleistung = Satz mit dem höchsten Gewicht über alle bisherigen Logs.
+   Extrem schlicht gehalten, zeigt nur was wirklich hilft (Progressive Overload). */
+function progressLine(ex){
+  const logs = ex.log || [];
+  if (!logs.length) return '';
+  // bestes Gewicht über alle Sätze aller Logs finden
+  let best = null;   // {kg, reps}
+  logs.forEach(l => {
+    (l.sets || []).forEach(s => {
+      const kg = parseFloat(String(s.kg).replace(',','.'));
+      if (!isNaN(kg)){
+        if (!best || kg > best.kg) best = { kg, reps: s.reps };
+      }
+    });
+  });
+  // letztes Training: bester (schwerster) Satz des jüngsten Logs
+  const lastLog = logs[logs.length-1];
+  let lastTop = null;
+  (lastLog.sets || []).forEach(s => {
+    const kg = parseFloat(String(s.kg).replace(',','.'));
+    if (!isNaN(kg)){ if (!lastTop || kg > lastTop.kg) lastTop = { kg, reps: s.reps }; }
+  });
+  const parts = [];
+  if (lastTop) parts.push(`<span class="prog-last">Letztes ${fmtKg(lastTop.kg)}×${esc(String(lastTop.reps))}</span>`);
+  if (best) parts.push(`<span class="prog-best">${IC.trophy||'★'} Best ${fmtKg(best.kg)}×${esc(String(best.reps))}</span>`);
+  if (!parts.length) return '';
+  return `<div class="sport-progress">${parts.join('')}</div>`;
+}
+function fmtKg(n){ return (Math.round(n*10)/10).toString().replace('.',',') + ' kg'; }
 
 function renderSportWeight(){
   let h = '';
@@ -2240,6 +2311,15 @@ function getNutrition(){
   if (!WORKOUT.nutrition) WORKOUT.nutrition = defaultNutrition();
   const def = defaultNutrition();
   const n = WORKOUT.nutrition;
+  // Migration: neuer Rezept-Pool (v2) — Verlaufsdaten (chosen, proteinToday, goals) bleiben erhalten
+  if ((n._nutver || 1) < def._nutver){
+    n.recipes = def.recipes;
+    n.week = def.week;
+    n._nutver = def._nutver;
+    // goals nur ergänzen falls fehlend, nicht überschreiben (User könnte angepasst haben)
+    if (!n.goals) n.goals = def.goals;
+    pushUpsert(WORKOUT, false);
+  }
   if (!n.recipes) n.recipes = def.recipes;
   if (!n.week) n.week = def.week;
   if (!n.goals) n.goals = def.goals;
@@ -2338,7 +2418,7 @@ function renderNutriDay(i){
       <button class="nutri-meal-body" data-reciperid="${rid}">
         <div class="nutri-meal-slot">${MEAL_LBL[slot]}</div>
         <div class="nutri-meal-name">${esc(r.name)}</div>
-        <div class="nutri-meal-vals">ca. ${r.kcal} kcal · ${r.protein} g Protein</div>
+        <div class="nutri-meal-vals">ca. ${r.kcal} kcal · ${r.protein} g Protein${r.cost?` · <span class="nutri-cost">${r.cost}</span>`:''}</div>
       </button>
     </div>`;
   });
@@ -2559,6 +2639,44 @@ function applySearch(list){
   );
 }
 
+/* ═══════════════ APP-ZUSTAND MERKEN (fühlt sich nativ an) ═══════════════
+   Speichert die aktuelle Ansicht + Scrollposition, damit die App nach
+   Hintergrund/Inaktivität (v.a. iPhone-PWA) genau dort weitermacht. */
+const UI_STATE_KEY = 'donow.uistate';
+let _restoringUI = false;   // verhindert Speichern während der Wiederherstellung
+
+function saveUIState(){
+  if (_restoringUI) return;
+  try {
+    const st = {
+      VIEW, OV_MODE, AREA_OPEN, AREA_TAB, SPORT_TAB, SPORT_DAY,
+      NUTRI_DAY, NOTE_OPEN, AREA_FILTER,
+      scrollY: window.scrollY || 0,
+      ts: Date.now(),
+    };
+    localStorage.setItem(UI_STATE_KEY, JSON.stringify(st));
+  } catch(e){}
+}
+function restoreUIState(){
+  try {
+    const raw = localStorage.getItem(UI_STATE_KEY);
+    if (!raw) return false;
+    const st = JSON.parse(raw);
+    // Nur sinnvolle Werte übernehmen
+    if (st.VIEW) VIEW = st.VIEW;
+    if (typeof st.OV_MODE === 'string') OV_MODE = st.OV_MODE;
+    AREA_OPEN = st.AREA_OPEN || null;
+    if (typeof st.AREA_TAB === 'string') AREA_TAB = st.AREA_TAB;
+    if (typeof st.SPORT_TAB === 'string') SPORT_TAB = st.SPORT_TAB;
+    SPORT_DAY = (st.SPORT_DAY === 0 || st.SPORT_DAY) ? st.SPORT_DAY : null;
+    NUTRI_DAY = (st.NUTRI_DAY === 0 || st.NUTRI_DAY) ? st.NUTRI_DAY : null;
+    NOTE_OPEN = st.NOTE_OPEN || null;
+    AREA_FILTER = st.AREA_FILTER || null;
+    return st;
+  } catch(e){ return false; }
+}
+function clearUIState(){ try { localStorage.removeItem(UI_STATE_KEY); } catch(e){} }
+
 function render(){
   const active = TASKS.filter(t => !t.done).sort((a,b) => score(a)-score(b));
   const completed = TASKS.filter(t => t.done);
@@ -2620,6 +2738,7 @@ function render(){
   renderNav();
   bindRoot();
   if (VIEW === 'settings') updateSyncBadge();
+  saveUIState();
 }
 
 function bindRoot(){
@@ -2672,6 +2791,11 @@ function bindRoot(){
   document.querySelectorAll('[data-exlog]').forEach(b => b.onclick = () => {
     const [i,j] = b.dataset.exlog.split(':').map(Number);
     openLogSheet(i, j);
+  });
+  document.querySelectorAll('[data-logedit]').forEach(b => b.onclick = () => {
+    const parts = b.dataset.logedit.split(':');
+    const i = +parts[0], j = +parts[1], ts = parts.slice(2).join(':');
+    openLogEditSheet(i, j, ts);
   });
   document.querySelectorAll('[data-exedit]').forEach(b => b.onclick = () => {
     const [i,j] = b.dataset.exedit.split(':').map(Number);
@@ -3244,6 +3368,134 @@ function openLogSheet(i, j){
 /* Sätze als kompakten Text: "50kg×10 · 45kg×8 · 45kg×8" */
 function summarizeSets(sets){
   return sets.map(s => `${s.kg}kg×${s.reps}`).join(' · ');
+}
+
+/* Bereits gespeicherten Log-Eintrag bearbeiten oder löschen.
+   Findet den Eintrag per Timestamp, füllt die Werte vor. */
+function openLogEditSheet(i, j, ts){
+  const ex = WORKOUT.days[i].exercises[j];
+  const isCardio = WORKOUT.days[i].type === 'cardio';
+  const nm = exName(WORKOUT, ex.exId);
+  const entry = (ex.log||[]).find(l => String(l.ts) === String(ts));
+  if (!entry){ showToast('Eintrag nicht gefunden'); return; }
+
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+
+  let setsHtml = '';
+  if (!isCardio){
+    const sets = entry.sets || [];
+    sets.forEach((st, s) => {
+      setsHtml += `<div class="logset-row">
+        <span class="logset-n">${s+1}.</span>
+        <input class="logset-kg" data-set="${s}" type="number" inputmode="decimal" step="0.5" placeholder="kg" value="${st.kg!=null&&st.kg!=='?'?esc(String(st.kg)):''}">
+        <span class="logset-x">kg ×</span>
+        <input class="logset-reps" data-set="${s}" type="number" inputmode="numeric" placeholder="Wdh" value="${st.reps!=null&&st.reps!=='?'?esc(String(st.reps)):''}">
+        <button class="logset-del" data-setdel="${s}" aria-label="Satz löschen">${IC.x}</button>
+      </div>`;
+    });
+  }
+
+  ov.innerHTML = `<div class="sheet" id="sportSheetInner">
+    <div class="sheet-head"><div class="sheet-title">Eintrag bearbeiten</div><button class="sheet-x" id="sportClose">${IC.x}</button></div>
+    <div class="sheet-body">
+      <div class="sport-sheet-ex">${esc(nm)}</div>
+      <div class="sport-sheet-target">${fmtLogDate(entry.ts)} eingetragen</div>
+      ${isCardio ? `
+        <div class="sec-lbl">Dauer (Minuten)</div>
+        <div class="field-card"><input class="cat-in-full" id="logMin" type="number" inputmode="numeric" placeholder="z. B. 35" value="${entry.min!=null?entry.min:''}"></div>
+        <div class="log-grid">
+          <div><div class="sec-lbl">Puls (bpm)</div><div class="field-card"><input class="cat-in-full" id="logBpm" type="number" inputmode="numeric" placeholder="z. B. 130" value="${entry.bpm!=null?entry.bpm:''}"></div></div>
+          <div><div class="sec-lbl">Watt (optional)</div><div class="field-card"><input class="cat-in-full" id="logWatt" type="number" inputmode="numeric" placeholder="z. B. 80" value="${entry.watt!=null?entry.watt:''}"></div></div>
+        </div>
+        <div class="sec-lbl">Notiz (optional)</div>
+        <div class="field-card"><input class="cat-in-full" id="logNote" placeholder="z. B. 18 km" value="${entry.note?esc(entry.note):''}"></div>
+      ` : `
+        <div class="sec-lbl">Sätze — Gewicht &amp; Wiederholungen</div>
+        <div class="logset-list" id="editSetList">${setsHtml}</div>
+        <button class="logset-add" id="logSetAdd">${IC.plus} Satz hinzufügen</button>
+      `}
+      <button class="sheet-save" id="logSave">Änderungen speichern</button>
+      <button class="sheet-del-btn" id="logDelete">${IC.trash} Eintrag löschen</button>
+    </div>
+  </div>`;
+  ov.onmousedown = e => { if (e.target === ov) closeSportSheet(); };
+  document.body.appendChild(ov);
+  sportSheetEl = ov;
+  enhanceNumberInputs(ov);
+  $('sportClose').onclick = closeSportSheet;
+
+  // Satz hinzufügen (Kraft)
+  const addBtn = $('logSetAdd');
+  if (addBtn) addBtn.onclick = () => {
+    const list = $('editSetList');
+    const s = list.querySelectorAll('.logset-row').length;
+    const row = document.createElement('div');
+    row.className = 'logset-row';
+    row.innerHTML = `<span class="logset-n">${s+1}.</span>
+      <input class="logset-kg" data-set="${s}" type="number" inputmode="decimal" step="0.5" placeholder="kg" value="">
+      <span class="logset-x">kg ×</span>
+      <input class="logset-reps" data-set="${s}" type="number" inputmode="numeric" placeholder="Wdh" value="">
+      <button class="logset-del" data-setdel="${s}" aria-label="Satz löschen">${IC.x}</button>`;
+    list.appendChild(row);
+    enhanceNumberInputs(row);
+    row.querySelector('.logset-del').onclick = () => { row.remove(); renumberEditSets(); };
+  };
+  // Satz-Löschen-Buttons
+  sportSheetEl.querySelectorAll('.logset-del').forEach(b => b.onclick = () => {
+    b.closest('.logset-row').remove(); renumberEditSets();
+  });
+
+  // Speichern
+  $('logSave').onclick = () => {
+    if (isCardio){
+      const min = ($('logMin').value||'').trim();
+      const bpm = ($('logBpm').value||'').trim();
+      const watt = ($('logWatt').value||'').trim();
+      const note = ($('logNote').value||'').trim();
+      if (!min && !bpm){ showToast('Bitte Dauer oder Puls eingeben'); return; }
+      let parts = [];
+      if (min) parts.push(`${min} min`);
+      if (bpm) parts.push(`${bpm} bpm`);
+      if (watt) parts.push(`${watt} W`);
+      if (note) parts.push(note);
+      entry.text = parts.join(' · ');
+      entry.min = +min||null; entry.bpm = +bpm||null; entry.watt = +watt||null; entry.note = note;
+    } else {
+      const kgInputs = sportSheetEl.querySelectorAll('.logset-kg');
+      const repInputs = sportSheetEl.querySelectorAll('.logset-reps');
+      const sets = [];
+      for (let s = 0; s < kgInputs.length; s++){
+        const kg = (kgInputs[s].value||'').trim();
+        const reps = (repInputs[s].value||'').trim();
+        if (kg || reps) sets.push({ kg: kg||'?', reps: reps||'?' });
+      }
+      if (!sets.length){ showToast('Mindestens ein Satz nötig (oder Eintrag löschen)'); return; }
+      entry.sets = sets;
+      entry.text = summarizeSets(sets);
+    }
+    pushUpsert(WORKOUT, false);
+    closeSportSheet(); render();
+    showToast('Aktualisiert ✓');
+  };
+
+  // Löschen
+  $('logDelete').onclick = () => {
+    if (confirm('Diesen Eintrag wirklich löschen?')){
+      ex.log = (ex.log||[]).filter(l => String(l.ts) !== String(ts));
+      pushUpsert(WORKOUT, false);
+      closeSportSheet(); render();
+      showToast('Gelöscht');
+    }
+  };
+}
+// Satz-Nummern in der Bearbeiten-Liste neu durchnummerieren
+function renumberEditSets(){
+  if (!sportSheetEl) return;
+  sportSheetEl.querySelectorAll('#editSetList .logset-row').forEach((row, idx) => {
+    const n = row.querySelector('.logset-n');
+    if (n) n.textContent = `${idx+1}.`;
+  });
 }
 
 // Übung bearbeiten oder neu anlegen (j===null = neu)
@@ -3882,6 +4134,24 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     navigator.serviceWorker.register(swUrl).catch(() => {});
   });
 }
+
+/* App-Zustand sichern, bevor iOS/Android die PWA in den Hintergrund schickt.
+   Das ist der Schlüssel, damit man nach Rückkehr nicht auf der Übersicht landet. */
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && typeof saveUIState === 'function' && USER){
+    saveUIState();
+  }
+});
+window.addEventListener('pagehide', () => {
+  if (typeof saveUIState === 'function' && USER) saveUIState();
+});
+// Scrollposition laufend (gedrosselt) mitschreiben, damit sie beim Verdrängen aktuell ist
+let _scrollSaveTimer = null;
+window.addEventListener('scroll', () => {
+  if (!USER) return;
+  if (_scrollSaveTimer) return;
+  _scrollSaveTimer = setTimeout(() => { _scrollSaveTimer = null; saveUIState(); }, 400);
+}, { passive:true });
 
 document.addEventListener('DOMContentLoaded', boot);
 
