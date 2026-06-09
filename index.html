@@ -2026,17 +2026,29 @@ function notesInAreaId(areaId){
   return NOTES.filter(n => n.areaId === areaId).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
 }
 function docsInAreaId(areaId){
-  // Dokumente liegen als Notiz-ähnliche Objekte vor (_kind:"note", type:"doc")
-  return NOTES.filter(n => n.areaId === areaId && n.type === 'doc');
+  // Dokumente liegen als Notiz-ähnliche Objekte vor (_kind:"note", type:"doc").
+  // Nur "echte" Dokumente mit gültigem Storage-Pfad — tote/abgebrochene Einträge ausblenden.
+  return NOTES.filter(n => n.areaId === areaId && n.type === 'doc' && n.docPath);
+}
+// Existiert ein Dokument wirklich (Objekt + Storage-Pfad)?
+function docExists(id){
+  const d = NOTES.find(n => n.id === id && n.type === 'doc');
+  return !!(d && d.docPath);
 }
 // Ordner eines Bereichs
 function foldersInAreaId(areaId){
   return NOTES.filter(n => n.areaId === areaId && n.type === 'docfolder').sort((a,b)=>(a.title||'').localeCompare(b.title||''));
 }
-// Dokumente in einem bestimmten Ordner (oder lose, wenn folderId null)
+// Dokumente in einem bestimmten Ordner (oder lose, wenn folderId null).
+// Schutz: Zeigt ein Dokument auf einen nicht mehr existierenden Ordner, gilt es als lose (Wurzel) —
+// so geht nie ein Dokument "verloren", selbst wenn sein Ordner mal verwaist ist.
 function docsInFolder(areaId, folderId){
-  return NOTES.filter(n => n.areaId === areaId && n.type === 'doc' && (n.folderId||null) === (folderId||null))
-    .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  return NOTES.filter(n => {
+    if (n.areaId !== areaId || n.type !== 'doc') return false;
+    let fid = n.folderId || null;
+    if (fid && !folderById(fid)) fid = null;   // verwaist → Wurzel
+    return fid === (folderId || null);
+  }).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
 }
 function folderById(id){ return NOTES.find(n => n.id === id && n.type === 'docfolder'); }
 function docFolderCreate(areaId, name){
@@ -2147,7 +2159,8 @@ function renderAreaDetail(area){
 }
 
 function renderAreaNotes(area){
-  const notes = notesInAreaId(area.id).filter(n => n.type !== 'doc');
+  // NUR echte Notizen (text/checklist) — keine Dokumente, keine Ordner!
+  const notes = notesInAreaId(area.id).filter(n => n.type !== 'doc' && n.type !== 'docfolder');
   let h = '';
   if (!notes.length){
     h += `<div class="notes-empty">Noch keine Notizen in „${esc(area.name)}". Leg unten die erste an.</div>`;
@@ -2301,7 +2314,7 @@ function resolveNoteLink(lnk){
     return f ? { label:`${a?a.name+' · ':''}${f.title}`, areaId:f.areaId, folderId:f.id } : null;
   }
   if (lnk.kind === 'doc'){
-    const d = NOTES.find(n => n.id === lnk.id && n.type === 'doc'); const a = d && areaById(d.areaId);
+    const d = NOTES.find(n => n.id === lnk.id && n.type === 'doc' && n.docPath); const a = d && areaById(d.areaId);
     return d ? { label:`${a?a.name+' · ':''}${d.title}`, areaId:d.areaId, docId:d.id, folderId:d.folderId } : null;
   }
   return null;
@@ -2396,7 +2409,15 @@ function noteCreate(areaId, type){
   return note;
 }
 function noteSave(note){ note.updatedAt = Date.now(); pushUpsert(note, false); }
-function noteDelete(id){ NOTES = NOTES.filter(n => n.id !== id); cloudDelete(id).catch(()=>{}); }
+function noteDelete(id){
+  const obj = NOTES.find(n => n.id === id);
+  // Sicherheitsnetz: Ist es in Wahrheit ein Ordner? Dann über docFolderDelete (Docs bleiben erhalten).
+  if (obj && obj.type === 'docfolder'){ docFolderDelete(id); return; }
+  // Sicherheitsnetz: Ist es ein Dokument? Dann über docDelete (entfernt auch die Datei sauber).
+  if (obj && obj.type === 'doc'){ docDelete(id); return; }
+  NOTES = NOTES.filter(n => n.id !== id);
+  cloudDelete(id).catch(()=>{});
+}
 
 /* ── Dokumente: Upload zu Supabase Storage ──
    Bucket "documents" muss in Supabase existieren (öffentlich lesbar).
