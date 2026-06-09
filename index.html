@@ -677,6 +677,14 @@ body.dnd-active .sport-ex{user-select:none;-webkit-user-select:none;}
 .set-account{display:flex;align-items:center;justify-content:space-between;padding:13px 0;gap:12px;}
 .set-email{font-size:13.5px;color:var(--muted);font-family:'JetBrains Mono';overflow:hidden;text-overflow:ellipsis;}
 .reset-btn,.logout-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border-radius:10px;padding:12px;font-size:14px;cursor:pointer;transition:.15s;}
+.reset-btn.danger{background:rgba(255,93,77,.08);border:1px solid rgba(255,93,77,.3);color:var(--p1);}
+.reset-btn.danger:hover{background:rgba(255,93,77,.15);border-color:rgba(255,93,77,.5);}
+.fr-warn{background:rgba(255,93,77,.08);border:1px solid rgba(255,93,77,.25);border-radius:11px;padding:14px;font-size:13.5px;line-height:1.55;color:var(--text);margin-bottom:18px;}
+.fr-warn svg{width:15px;height:15px;vertical-align:-2px;color:var(--p1);}
+.fr-confirm{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--p1);color:#fff;border:none;border-radius:12px;padding:14px;font-size:14.5px;font-weight:600;cursor:pointer;margin-top:4px;transition:.13s;}
+.fr-confirm svg{width:16px;height:16px;}
+.fr-confirm:hover{filter:brightness(1.08);}
+.fr-confirm:disabled{opacity:.6;cursor:default;}
 .reset-btn{background:rgba(255,93,77,.08);border:1px solid rgba(255,93,77,.25);color:var(--p1);}
 .reset-btn:hover{background:rgba(255,93,77,.15);}
 .logout-btn{background:var(--card-hi);border:1px solid var(--line);color:var(--text);}
@@ -1564,6 +1572,59 @@ function openPasswordSheet(){
   };
 }
 
+/* Kompletter Werksreset — löscht ALLES (Aufgaben, Bereiche, Notizen, Dokumente,
+   Trainingsplan, Gewichte, Links) aus der Datenbank UND dem Datei-Speicher.
+   Zur Sicherheit mit dem Login-Passwort zu bestätigen. */
+function openFactoryResetSheet(){
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  ov.innerHTML = `<div class="sheet" id="sportSheetInner">
+    <div class="sheet-head"><div class="sheet-title">Auf Werkseinstellungen zurücksetzen</div><button class="sheet-x" id="frClose">${IC.x}</button></div>
+    <div class="sheet-body">
+      <div class="fr-warn">${IC.trash} <b>Achtung:</b> Das löscht unwiderruflich <b>alle</b> deine Daten in DoNow — Aufgaben, Bereiche, Notizen, hochgeladene Dokumente, den Trainings- und Essensplan, Gewichts­einträge und Links. Dein Konto bleibt bestehen, aber komplett leer.</div>
+      <div class="sec-lbl">Zur Bestätigung dein Login-Passwort</div>
+      <div class="field-card"><input class="cat-in-full" id="frPw" type="password" placeholder="Passwort" autocomplete="current-password"></div>
+      <button class="fr-confirm" id="frConfirm">${IC.trash} Endgültig alles löschen</button>
+      <div class="set-hint" style="margin-top:10px">Tipp: Wenn du nur Training oder Essen neu aufbauen willst, nutze stattdessen die „leeren“-Knöpfe im Sport-Bereich.</div>
+    </div>
+  </div>`;
+  ov.onmousedown = e => { if (e.target === ov) ov.remove(); };
+  document.body.appendChild(ov);
+  $('frClose').onclick = () => ov.remove();
+  $('frConfirm').onclick = async () => {
+    const pw = $('frPw').value || '';
+    if (!pw){ showToast('Bitte Passwort eingeben'); return; }
+    if (!sb || !USER){ showToast('Keine Verbindung'); return; }
+    const btn = $('frConfirm'); btn.disabled = true; btn.textContent = 'Prüfe Passwort…';
+    try {
+      // 1. Passwort verifizieren (erneuter Login mit aktueller Email)
+      const { error: authErr } = await sb.auth.signInWithPassword({ email: USER.email, password: pw });
+      if (authErr){ btn.disabled = false; btn.textContent = `${IC.trash} Endgültig alles löschen`; showToast('Passwort falsch'); return; }
+      btn.textContent = 'Lösche Daten…';
+      // 2. Alle Storage-Dateien des Nutzers entfernen
+      try {
+        const allDocs = NOTES.filter(n => n.type === 'doc' && n.docPath).map(n => n.docPath);
+        if (allDocs.length) await sb.storage.from(DOC_BUCKET).remove(allDocs);
+      } catch(e){ console.warn('Storage-Cleanup:', e.message); }
+      // 3. Alle Datenbank-Zeilen des Nutzers löschen (RLS schützt: nur eigene)
+      const { error: delErr } = await sb.from('tasks').delete().eq('user_id', USER.id);
+      if (delErr) throw delErr;
+      // 4. Lokalen Zustand komplett zurücksetzen
+      TASKS = []; TRASH = []; LINKS = []; WEIGHTS = []; NOTES = []; AREAS = [];
+      WORKOUT = null;
+      clearUIState();
+      migrateAreas([]);   // legt den festen Sport-Bereich sauber neu an
+      VIEW = 'overview'; OV_MODE = 'today'; AREA_OPEN = null; NOTE_OPEN = null;
+      ov.remove(); render();
+      showToast('DoNow wurde zurückgesetzt');
+    } catch(e){
+      console.warn('Werksreset-Fehler:', e.message);
+      btn.disabled = false; btn.textContent = `${IC.trash} Endgültig alles löschen`;
+      showToast('Fehler beim Zurücksetzen: ' + (e.message||'unbekannt'));
+    }
+  };
+}
+
 async function onLoggedIn(session){
   USER = session.user;
   $('login').style.display = 'none';
@@ -1594,6 +1655,7 @@ async function onLoggedIn(session){
   // Sicherheits-Check: zeigt der wiederhergestellte Zustand auf etwas Gültiges?
   if (AREA_OPEN && !AREAS.find(a => a.id === AREA_OPEN)) AREA_OPEN = null;
   if (NOTE_OPEN && !NOTES.find(n => n.id === NOTE_OPEN)) NOTE_OPEN = null;
+  if (DOC_FOLDER && !NOTES.find(n => n.id === DOC_FOLDER && n.type === 'docfolder')) DOC_FOLDER = null;
   if (!restored){ VIEW = 'overview'; OV_MODE = 'today'; }
   _restoringUI = false;
   render();
@@ -2454,6 +2516,9 @@ function areaAdd(name){
 function areaDelete(id){
   if (id === SPORT_AREA_ID) return;  // Sport ist fest
   const toDelete = NOTES.filter(n => n.areaId === id);
+  // Storage-Dateien der enthaltenen Dokumente mit entfernen (sonst verwaisen sie im Speicher)
+  const paths = toDelete.filter(n => n.type === 'doc' && n.docPath).map(n => n.docPath);
+  if (paths.length && sb){ sb.storage.from(DOC_BUCKET).remove(paths).catch(()=>{}); }
   NOTES = NOTES.filter(n => n.areaId !== id);
   toDelete.forEach(n => cloudDelete(n.id).catch(()=>{}));
   const area = areaById(id);
@@ -2778,6 +2843,10 @@ function getNutrition(){
   if (!n.recipes) n.recipes = def.recipes;
   if (!n.week) n.week = def.week;
   if (!n.goals) n.goals = def.goals;
+  // goals vollständig halten (alte Datenstände könnten Felder vermissen)
+  if (n.goals.kcal == null) n.goals.kcal = def.goals.kcal;
+  if (n.goals.protein == null) n.goals.protein = def.goals.protein;
+  if (n.goals.fat == null) n.goals.fat = def.goals.fat;
   if (!n.chosen) n.chosen = {};
   if (!n.proteinToday) n.proteinToday = {};
   return n;
@@ -3123,6 +3192,13 @@ function renderSettings(){
     <div class="field-card">
       <div class="set-row"><button class="reset-btn" id="openTrashBtn">${IC.trash}Papierkorb öffnen${TRASH.length?` (${TRASH.length})`:''}</button></div>
       <div class="set-row"><button class="reset-btn" id="trashAllBtn">${IC.trash}Alle in den Papierkorb</button></div>
+    </div>
+    <div class="sec-lbl" style="color:var(--p1);margin-top:24px">Gefahrenzone</div>
+    <div class="field-card">
+      <div class="set-row" style="flex-direction:column;align-items:stretch;gap:8px">
+        <button class="reset-btn danger" id="factoryResetBtn">${IC.trash}DoNow auf Werkseinstellungen zurücksetzen</button>
+        <span class="set-hint">Löscht unwiderruflich alle Daten. Mit Passwort zu bestätigen.</span>
+      </div>
     </div>
     <p class="set-foot">DoNow · synchron auf allen Geräten</p>
   </div>`;
@@ -3766,6 +3842,8 @@ function bindRoot(){
   if (lb) lb.onclick = doLogout;
   const cpw = $('changePwBtn');
   if (cpw) cpw.onclick = openPasswordSheet;
+  const fr = $('factoryResetBtn');
+  if (fr) fr.onclick = openFactoryResetSheet;
   const ta = $('trashAllBtn');
   if (ta) ta.onclick = () => {
     if (!TASKS.length) return;
