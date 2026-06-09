@@ -142,6 +142,23 @@ svg{width:18px;height:18px;display:block;}
 .sort-btn{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:11px 14px;color:var(--muted);font-size:13.5px;font-weight:500;cursor:pointer;transition:.15s;white-space:nowrap;}
 .sort-btn svg{width:15px;height:15px;}
 .sort-btn:hover{color:var(--text);border-color:#3a362e;}
+/* Filter-Button + Panel */
+.filter-btn{position:relative;display:flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:11px 13px;color:var(--muted);cursor:pointer;transition:.15s;flex-shrink:0;}
+.filter-btn svg{width:16px;height:16px;}
+.filter-btn:hover{color:var(--text);border-color:#3a362e;}
+.filter-btn.active{color:var(--accent);border-color:var(--accent-dim);}
+.filter-badge{position:absolute;top:-6px;right:-6px;background:var(--accent);color:#10100c;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;font-family:'JetBrains Mono';}
+.filter-panel{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px;margin-bottom:18px;animation:fade .15s;}
+.filter-group{margin-bottom:14px;}
+.filter-group:last-of-type{margin-bottom:0;}
+.filter-lbl{font-family:'JetBrains Mono';font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--faint);margin-bottom:8px;}
+.filter-chips{display:flex;flex-wrap:wrap;gap:7px;}
+.filter-chip{background:var(--card-hi);border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:8px 13px;font-size:13px;cursor:pointer;transition:.13s;display:inline-flex;align-items:center;gap:5px;}
+.filter-chip svg{width:13px;height:13px;}
+.filter-chip:hover{border-color:#3a362e;color:var(--text);}
+.filter-chip.on{background:var(--accent);color:#10100c;border-color:var(--accent);font-weight:600;}
+.filter-reset{width:100%;background:none;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:10px;font-size:13px;cursor:pointer;margin-top:14px;transition:.13s;}
+.filter-reset:hover{border-color:rgba(255,93,77,.4);color:var(--p1);}
 .sort-menu{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:5px;box-shadow:0 12px 36px rgba(0,0,0,.5);z-index:120;min-width:210px;max-height:80vh;overflow-y:auto;animation:fade .15s;}
 .sort-opt{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;color:var(--muted);font-size:13.5px;text-align:left;padding:9px 12px;border-radius:8px;cursor:pointer;transition:.12s;}
 .sort-opt:hover{background:var(--card-hi);color:var(--text);}
@@ -357,11 +374,52 @@ svg{width:18px;height:18px;display:block;}
 .note-additem svg{width:15px;height:15px;}
 .note-additem:hover{border-color:var(--accent-dim);color:var(--text);}
 .note-delete{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:none;border:1px solid var(--line);color:var(--faint);border-radius:11px;padding:12px;font-size:13.5px;cursor:pointer;margin-top:8px;transition:.13s;}
+.note-links{margin-top:4px;}
+.note-links-lbl{font-family:'JetBrains Mono';font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--faint);margin-bottom:8px;}
+.note-link-chip{display:flex;align-items:center;gap:10px;background:var(--card-hi);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:8px;cursor:pointer;transition:.13s;}
+.note-link-chip:hover{border-color:var(--accent-dim);}
+.note-link-ic{color:var(--accent);display:flex;flex-shrink:0;}
+.note-link-ic svg{width:16px;height:16px;}
+.note-link-txt{flex:1;font-size:14px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.note-link-del{background:none;border:none;color:var(--faint);cursor:pointer;padding:4px;flex-shrink:0;display:flex;transition:.13s;}
+.note-link-del svg{width:13px;height:13px;}
+.note-link-del:hover{color:var(--p1);}
+.note-addlink{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:none;border:1px dashed var(--line);color:var(--muted);border-radius:10px;padding:11px;font-size:13px;cursor:pointer;margin-bottom:8px;transition:.13s;}
+.note-addlink svg{width:15px;height:15px;}
+.note-addlink:hover{border-color:var(--accent-dim);color:var(--text);}
+.link-hint{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5;}
+.link-back{display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:0 0 12px;}
+.link-back svg{width:15px;height:15px;}
+.link-empty{font-size:13px;color:var(--faint);padding:12px;text-align:center;line-height:1.5;}
 .note-delete svg{width:15px;height:15px;}
 .note-delete:hover{border-color:rgba(255,93,77,.4);color:var(--p1);}
 /* Dokumente */
 .docs-note{background:rgba(109,180,214,.07);border:1px solid rgba(109,180,214,.22);border-radius:12px;padding:13px 15px;font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px;}
 .docs-upload{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;background:var(--accent);color:#10100c;border:none;border-radius:12px;padding:13px;font-size:14.5px;font-weight:600;cursor:pointer;margin-bottom:16px;transition:.13s;}
+.docs-actions{display:flex;gap:10px;margin-bottom:16px;}
+.docs-actions .docs-upload{margin-bottom:0;flex:1;}
+.docs-newfolder{display:flex;align-items:center;justify-content:center;gap:8px;flex:1;background:var(--card-hi);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:13px;font-size:14px;font-weight:500;cursor:pointer;transition:.13s;}
+.docs-newfolder svg{width:16px;height:16px;}
+.docs-newfolder:hover{border-color:var(--accent-dim);}
+.docs-folders{display:flex;flex-direction:column;gap:9px;margin-bottom:14px;}
+.docfolder-card{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;transition:.14s;}
+.docfolder-card:hover{border-color:#3a362e;}
+.docfolder-ic{width:38px;height:38px;border-radius:10px;background:var(--card-hi);display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0;}
+.docfolder-ic svg{width:19px;height:19px;}
+.docfolder-info{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;}
+.docfolder-name{font-size:15px;font-weight:600;color:var(--text);}
+.docfolder-meta{font-family:'JetBrains Mono';font-size:11.5px;color:var(--muted);}
+.docfolder-del{background:none;border:none;color:var(--faint);cursor:pointer;padding:6px;flex-shrink:0;transition:.13s;}
+.docfolder-del svg{width:16px;height:16px;}
+.docfolder-del:hover{color:var(--p1);}
+.doc-move{background:none;border:none;color:var(--faint);cursor:pointer;padding:6px;flex-shrink:0;transition:.13s;}
+.doc-move svg{width:16px;height:16px;}
+.doc-move:hover{color:var(--accent);}
+.move-list{display:flex;flex-direction:column;gap:8px;}
+.move-opt{display:flex;align-items:center;gap:10px;width:100%;background:var(--card-hi);border:1px solid var(--line);color:var(--text);border-radius:11px;padding:14px;font-size:14.5px;text-align:left;cursor:pointer;transition:.13s;}
+.move-opt svg{width:17px;height:17px;color:var(--muted);}
+.move-opt:hover{border-color:var(--accent-dim);}
+.move-opt.on{border-color:var(--accent);color:var(--accent);}
 .docs-upload svg{width:17px;height:17px;}
 .docs-upload:active{transform:scale(.98);}
 .docs-list{display:flex;flex-direction:column;gap:9px;}
@@ -396,6 +454,13 @@ svg{width:18px;height:18px;display:block;}
 .sport-daycard-r svg{width:18px;height:18px;}
 .sport-reset{display:block;width:100%;margin-top:18px;background:none;border:none;color:var(--faint);font-size:12.5px;cursor:pointer;padding:8px;transition:.13s;}
 .sport-reset:hover{color:var(--muted);}
+.sport-resetrow{display:flex;gap:10px;margin-top:14px;}
+.sport-resetrow .sport-reset{margin-top:0;border:1px solid var(--line);border-radius:10px;padding:11px 8px;}
+.sport-resetrow .sport-reset:hover{border-color:#3a362e;color:var(--text);}
+.sport-resetrow .sport-reset.empty:hover{border-color:rgba(255,93,77,.35);color:var(--p1);}
+.sport-dayclear{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:10px;background:none;border:1px solid var(--line);color:var(--faint);border-radius:10px;padding:11px;font-size:13px;cursor:pointer;transition:.13s;}
+.sport-dayclear svg{width:14px;height:14px;}
+.sport-dayclear:hover{border-color:rgba(255,93,77,.35);color:var(--p1);}
 .sport-back{display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--muted);font-size:13.5px;cursor:pointer;padding:4px 0 14px;transition:.13s;}
 .sport-back svg{width:16px;height:16px;}
 .sport-back:hover{color:var(--text);}
@@ -821,6 +886,7 @@ let SPORT_DAY = null;    // aktuell geöffneter Trainingstag-Index oder null
 let NUTRI_DAY = null;    // aktuell geöffneter Ernährungstag-Index oder null
 let NOTES = [];          // Notizen (_kind:"note", referenzieren areaId)
 let NOTE_OPEN = null;    // aktuell geöffnete Notiz-ID oder null
+let DOC_FOLDER = null;   // offener Dokumente-Ordner (id) oder null (Wurzel)
 const SPORT_AREA_ID = 'area-sport';   // feste ID des Sport-Bereichs
 let NAME  = localStorage.getItem('pilot.name') || '';
 let VIEW  = 'overview';  // Hauptnavigation: overview | sport | links | trash | settings
@@ -835,6 +901,14 @@ let SORT = 'smart';      // smart | due | prio | effort | name | created
 let SORT_DIR = 'asc';    // asc | desc (nur für nicht-smart)
 let SORT2 = 'none';      // zweites Kriterium oder 'none'
 let SORT2_DIR = 'asc';
+/* Umfangreicher To-Do-Filter (kombinierbar). null/leer = inaktiv. */
+let FILTER = {
+  prio: [],         // Array von 1|2|3 (Mehrfachauswahl)
+  cat: [],          // Array von Kategorienamen
+  due: 'any',       // 'any' | 'overdue' | 'today' | 'week' | 'nodate'
+  fav: false,       // nur Favoriten
+};
+let FILTER_OPEN = false;   // Filter-Panel sichtbar?
 let toastTimer = null;
 
 /* ---------- Konstanten ---------- */
@@ -917,6 +991,57 @@ function defaultWorkoutPlan(){
       { wd:'So', type:'rest', title:'Ruhetag', exercises:[] },
     ]
   };
+}
+
+/* Leerer Trainingsplan: 7 Tage, aber ohne Übungen — zum selbst Befüllen.
+   Behält die Übungs-DB (Auswahl), damit man Übungen wählen kann. */
+function emptyWorkoutPlan(){
+  return {
+    _kind: 'workout', id: 'workout-plan',
+    exDb: EXERCISE_SEED.slice(),
+    days: [
+      { wd:'Mo', type:'kraft',  title:'Tag 1', exercises:[] },
+      { wd:'Di', type:'kraft',  title:'Tag 2', exercises:[] },
+      { wd:'Mi', type:'kraft',  title:'Tag 3', exercises:[] },
+      { wd:'Do', type:'kraft',  title:'Tag 4', exercises:[] },
+      { wd:'Fr', type:'kraft',  title:'Tag 5', exercises:[] },
+      { wd:'Sa', type:'rest',   title:'Ruhetag', exercises:[] },
+      { wd:'So', type:'rest',   title:'Ruhetag', exercises:[] },
+    ]
+  };
+}
+/* Leere Ernährung: keine Rezepte/Wochenplan, nur Standard-Ziele — zum selbst Befüllen. */
+function emptyNutrition(){
+  return {
+    _nutver: 3,
+    goals: { kcal:2300, protein:170, fat:70 },
+    proteinToday: {},
+    recipes: {},
+    week: [ {a:null,b:null},{a:null,b:null},{a:null,b:null},{a:null,b:null},{a:null,b:null},{a:null,b:null},{a:null,b:null} ],
+    chosen: {},
+  };
+}
+/* Reset-Funktionen — leeren NUR die Daten des aktuell eingeloggten Nutzers
+   (in dessen eigener Datenbank). Beim Verschenken kann ein Kumpel so bei null starten. */
+function resetWorkout(){
+  const fresh = emptyWorkoutPlan();
+  // exDb des aktuellen Plans behalten (eigene Übungen bleiben wählbar)
+  if (WORKOUT && WORKOUT.exDb) fresh.exDb = WORKOUT.exDb;
+  // Ernährung NICHT anfassen (getrennte Knöpfe) — rüberretten
+  if (WORKOUT && WORKOUT.nutrition) fresh.nutrition = WORKOUT.nutrition;
+  WORKOUT = fresh;
+  pushUpsert(WORKOUT, false);
+}
+function resetNutrition(){
+  if (!WORKOUT) WORKOUT = emptyWorkoutPlan();
+  WORKOUT.nutrition = emptyNutrition();
+  pushUpsert(WORKOUT, false);
+}
+function clearWorkoutDay(i){
+  if (WORKOUT && WORKOUT.days[i]){
+    WORKOUT.days[i].exercises = [];
+    pushUpsert(WORKOUT, false);
+  }
 }
 /* Übungsnamen aus der DB holen (mit Fallback). */
 function exName(workout, exId){
@@ -1099,6 +1224,9 @@ const IC = {
   note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>',
   paperclip:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>',
   trophy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
+  filter:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>',
+  star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+  folder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>',
   activity:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
   grip:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
   image:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
@@ -1898,8 +2026,57 @@ function notesInAreaId(areaId){
   return NOTES.filter(n => n.areaId === areaId).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
 }
 function docsInAreaId(areaId){
-  // Dokumente liegen als Notiz-ähnliche Objekte vor (_kind:"note", type:"doc") — vorbereitet für PDF-Upload
+  // Dokumente liegen als Notiz-ähnliche Objekte vor (_kind:"note", type:"doc")
   return NOTES.filter(n => n.areaId === areaId && n.type === 'doc');
+}
+// Ordner eines Bereichs
+function foldersInAreaId(areaId){
+  return NOTES.filter(n => n.areaId === areaId && n.type === 'docfolder').sort((a,b)=>(a.title||'').localeCompare(b.title||''));
+}
+// Dokumente in einem bestimmten Ordner (oder lose, wenn folderId null)
+function docsInFolder(areaId, folderId){
+  return NOTES.filter(n => n.areaId === areaId && n.type === 'doc' && (n.folderId||null) === (folderId||null))
+    .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+}
+function folderById(id){ return NOTES.find(n => n.id === id && n.type === 'docfolder'); }
+function docFolderCreate(areaId, name){
+  name = (name||'').trim(); if (!name) return null;
+  const f = { _kind:'note', id:'folder-'+uid(), areaId, type:'docfolder', title:name, createdAt:Date.now(), updatedAt:Date.now() };
+  NOTES.unshift(f); pushUpsert(f, false); return f;
+}
+function docFolderDelete(id){
+  // Dokumente im Ordner wandern zurück in die Wurzel (nicht löschen!)
+  NOTES.forEach(n => { if (n.type==='doc' && n.folderId===id){ n.folderId = null; pushUpsert(n, false); } });
+  const f = folderById(id);
+  NOTES = NOTES.filter(n => n.id !== id);
+  if (f) cloudDelete(f.id).catch(()=>{});
+}
+function docMoveToFolder(docId, folderId){
+  const d = NOTES.find(n => n.id === docId && n.type === 'doc');
+  if (d){ d.folderId = folderId || null; pushUpsert(d, false); }
+}
+// Sheet zum Verschieben eines Dokuments in einen Ordner (oder in die Wurzel)
+function openMoveSheet(docId){
+  const d = NOTES.find(n => n.id === docId && n.type === 'doc');
+  if (!d) return;
+  const folders = foldersInAreaId(d.areaId);
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  let opts = `<button class="move-opt ${!d.folderId?'on':''}" data-moveto="">${IC.paperclip} Keine (Übersicht)</button>`;
+  folders.forEach(f => {
+    opts += `<button class="move-opt ${d.folderId===f.id?'on':''}" data-moveto="${esc(f.id)}">${IC.folder} ${esc(f.title)}</button>`;
+  });
+  ov.innerHTML = `<div class="sheet" id="sportSheetInner">
+    <div class="sheet-head"><div class="sheet-title">Verschieben nach…</div><button class="sheet-x" id="moveClose">${IC.x}</button></div>
+    <div class="sheet-body"><div class="move-list">${opts}</div></div>
+  </div>`;
+  ov.onmousedown = e => { if (e.target === ov) ov.remove(); };
+  document.body.appendChild(ov);
+  $('moveClose').onclick = () => ov.remove();
+  ov.querySelectorAll('[data-moveto]').forEach(b => b.onclick = () => {
+    docMoveToFolder(docId, b.dataset.moveto || null);
+    ov.remove(); render(); showToast('Verschoben ✓');
+  });
 }
 
 function renderBereiche(){
@@ -1998,27 +2175,75 @@ function renderAreaNotes(area){
 }
 
 function renderAreaDocs(area){
-  const docs = docsInAreaId(area.id);
-  let h = `<div class="docs-note">Wichtige Dokumente für „${esc(area.name)}" — Fahrzeugschein, Policen, Bescheide. PDFs und Bilder, immer dabei.</div>`;
-  h += `<button class="docs-upload" data-docupload="${esc(area.id)}">${IC.paperclip} Dokument hochladen</button>`;
+  // Ordner-Ansicht: in einem Ordner drin
+  if (DOC_FOLDER){
+    const folder = folderById(DOC_FOLDER);
+    if (!folder){ DOC_FOLDER = null; }
+    else return renderDocFolder(area, folder);
+  }
+  // Wurzel-Ansicht: Ordner + lose Dokumente
+  const folders = foldersInAreaId(area.id);
+  const looseDocs = docsInFolder(area.id, null);
+  let h = `<div class="docs-note">Wichtige Dokumente für „${esc(area.name)}" — Fahrzeugschein, Policen, Bescheide. In Ordnern sortierbar.</div>`;
+  h += `<div class="docs-actions">
+    <button class="docs-upload" data-docupload="${esc(area.id)}">${IC.paperclip} Dokument</button>
+    <button class="docs-newfolder" data-newfolder="${esc(area.id)}">${IC.folder||IC.layers} Ordner</button>
+  </div>`;
   h += `<input type="file" id="docFileInput" accept="image/*,application/pdf" style="display:none">`;
-  if (docs.length){
-    h += `<div class="docs-list">`;
-    docs.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).forEach(d => {
-      const isImg = d.docType && d.docType.startsWith('image/');
-      h += `<div class="doc-card">
-        <button class="doc-open" data-docopen="${esc(d.id)}">
-          <span class="doc-icon">${isImg?IC.image:IC.paperclip}</span>
-          <span class="doc-info"><span class="doc-name">${esc(d.title||'Dokument')}</span><span class="doc-meta">${isImg?'Bild':'PDF'}${d.size?` · ${fmtSize(d.size)}`:''}</span></span>
-        </button>
-        <button class="doc-del" data-docdel="${esc(d.id)}" aria-label="Löschen">${IC.trash2}</button>
+  // Ordner
+  if (folders.length){
+    h += `<div class="docs-folders">`;
+    folders.forEach(f => {
+      const cnt = docsInFolder(area.id, f.id).length;
+      h += `<div class="docfolder-card" data-folderopen="${esc(f.id)}">
+        <span class="docfolder-ic">${IC.folder||IC.layers}</span>
+        <span class="docfolder-info"><span class="docfolder-name">${esc(f.title)}</span><span class="docfolder-meta">${cnt} ${cnt===1?'Dokument':'Dokumente'}</span></span>
+        <button class="docfolder-del" data-folderdel="${esc(f.id)}" aria-label="Ordner löschen">${IC.trash2}</button>
       </div>`;
     });
     h += `</div>`;
-  } else {
-    h += `<div class="docs-placeholder">${IC.paperclip}<span>Noch keine Dokumente</span></div>`;
+  }
+  // Lose Dokumente (ohne Ordner)
+  if (looseDocs.length){
+    h += `<div class="docs-list">`;
+    looseDocs.forEach(d => h += docCardHtml(d, area));
+    h += `</div>`;
+  }
+  if (!folders.length && !looseDocs.length){
+    h += `<div class="docs-placeholder">${IC.paperclip}<span>Noch keine Dokumente oder Ordner</span></div>`;
   }
   return h;
+}
+// Ansicht innerhalb eines Ordners
+function renderDocFolder(area, folder){
+  const docs = docsInFolder(area.id, folder.id);
+  let h = `<button class="fokus-back" data-docfolderback="1">${IC.chevLeft} Alle Dokumente</button>`;
+  h += `<div class="notes-area-head"><div class="notes-area-title">${IC.folder||''} ${esc(folder.title)}</div></div>`;
+  h += `<button class="docs-upload" data-docupload="${esc(area.id)}" data-intofolder="${esc(folder.id)}">${IC.paperclip} Dokument in diesen Ordner</button>`;
+  h += `<input type="file" id="docFileInput" accept="image/*,application/pdf" style="display:none">`;
+  if (docs.length){
+    h += `<div class="docs-list">`;
+    docs.forEach(d => h += docCardHtml(d, area));
+    h += `</div>`;
+  } else {
+    h += `<div class="docs-placeholder">${IC.paperclip}<span>Ordner ist leer</span></div>`;
+  }
+  return h;
+}
+// Einzelne Dokumentenkarte (wiederverwendet in Wurzel + Ordner)
+function docCardHtml(d, area){
+  const isImg = d.docType && d.docType.startsWith('image/');
+  const folders = foldersInAreaId(area.id);
+  // Verschiebe-Menü nur anbieten, wenn es Ordner gibt
+  const moveBtn = folders.length ? `<button class="doc-move" data-docmove="${esc(d.id)}" aria-label="Verschieben">${IC.folder||IC.layers}</button>` : '';
+  return `<div class="doc-card">
+    <button class="doc-open" data-docopen="${esc(d.id)}">
+      <span class="doc-icon">${isImg?IC.image:IC.paperclip}</span>
+      <span class="doc-info"><span class="doc-name">${esc(d.title||'Dokument')}</span><span class="doc-meta">${isImg?'Bild':'PDF'}${d.size?` · ${fmtSize(d.size)}`:''}</span></span>
+    </button>
+    ${moveBtn}
+    <button class="doc-del" data-docdel="${esc(d.id)}" aria-label="Löschen">${IC.trash2}</button>
+  </div>`;
 }
 function fmtSize(bytes){
   if (bytes < 1024) return bytes+' B';
@@ -2045,9 +2270,100 @@ function renderNoteDetail(note){
   } else {
     h += `<textarea class="note-body-in" id="noteBody" placeholder="Schreib los…">${esc(note.body||'')}</textarea>`;
   }
+  // Verknüpfungen (zu Ordnern/Dokumenten innerhalb DoNow)
+  h += `<div class="note-links">`;
+  const links = note.links || [];
+  if (links.length){
+    h += `<div class="note-links-lbl">Verknüpfungen</div>`;
+    links.forEach((lnk, idx) => {
+      const target = resolveNoteLink(lnk);
+      h += `<div class="note-link-chip" data-notelinkgo="${idx}">
+        <span class="note-link-ic">${lnk.kind==='folder'?IC.folder:(lnk.kind==='doc'?IC.paperclip:IC.bullseye)}</span>
+        <span class="note-link-txt">${esc(target ? target.label : 'Ziel nicht gefunden')}</span>
+        <button class="note-link-del" data-notelinkdel="${idx}" aria-label="Entfernen">${IC.x}</button>
+      </div>`;
+    });
+  }
+  h += `<button class="note-addlink" data-noteaddlink="1">${IC.link} Verknüpfung einfügen</button>`;
+  h += `</div>`;
   h += `<button class="note-delete" data-notedelete="${esc(note.id)}">${IC.trash}Notiz löschen</button>`;
   h += `</div>`;
   return h;
+}
+/* Löst eine Notiz-Verknüpfung zu ihrem Ziel auf → {label, areaId, ...} oder null */
+function resolveNoteLink(lnk){
+  if (!lnk) return null;
+  if (lnk.kind === 'area'){
+    const a = areaById(lnk.areaId); return a ? { label:a.name, areaId:a.id } : null;
+  }
+  if (lnk.kind === 'folder'){
+    const f = folderById(lnk.id); const a = f && areaById(f.areaId);
+    return f ? { label:`${a?a.name+' · ':''}${f.title}`, areaId:f.areaId, folderId:f.id } : null;
+  }
+  if (lnk.kind === 'doc'){
+    const d = NOTES.find(n => n.id === lnk.id && n.type === 'doc'); const a = d && areaById(d.areaId);
+    return d ? { label:`${a?a.name+' · ':''}${d.title}`, areaId:d.areaId, docId:d.id, folderId:d.folderId } : null;
+  }
+  return null;
+}
+/* Auswahl-Sheet für eine Verknüpfung: Bereich → Ordner/Dokument. */
+function openLinkPicker(noteId){
+  const note = NOTES.find(n => n.id === noteId);
+  if (!note) return;
+  if (!note.links) note.links = [];
+  let pickArea = null;   // gewählter Bereich (für Schritt 2)
+
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  document.body.appendChild(ov);
+
+  function draw(){
+    let body = '';
+    if (!pickArea){
+      // Schritt 1: Bereich wählen
+      body += `<div class="link-hint">Wohin soll die Verknüpfung zeigen? Erst Bereich wählen.</div><div class="move-list">`;
+      AREAS.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(a => {
+        body += `<button class="move-opt" data-pickarea="${esc(a.id)}">${IC[a.icon]||IC.bullseye} ${esc(a.name)}</button>`;
+      });
+      body += `</div>`;
+    } else {
+      // Schritt 2: Ziel im Bereich wählen (Bereich selbst, Ordner oder Dokument)
+      const a = areaById(pickArea);
+      const folders = foldersInAreaId(pickArea);
+      const docs = docsInAreaId(pickArea);
+      body += `<button class="link-back" id="linkBack">${IC.chevLeft} Anderer Bereich</button>`;
+      body += `<div class="link-hint">Ziel in „${esc(a?a.name:'')}" wählen:</div><div class="move-list">`;
+      body += `<button class="move-opt" data-picktarget="area:${esc(pickArea)}">${IC.bullseye} Bereich „${esc(a?a.name:'')}" selbst</button>`;
+      folders.forEach(f => {
+        body += `<button class="move-opt" data-picktarget="folder:${esc(f.id)}">${IC.folder} ${esc(f.title)}</button>`;
+      });
+      docs.forEach(d => {
+        body += `<button class="move-opt" data-picktarget="doc:${esc(d.id)}">${IC.paperclip} ${esc(d.title)}</button>`;
+      });
+      if (!folders.length && !docs.length){
+        body += `<div class="link-empty">Keine Ordner/Dokumente in diesem Bereich — du kannst aber auf den Bereich selbst verlinken.</div>`;
+      }
+      body += `</div>`;
+    }
+    ov.innerHTML = `<div class="sheet" id="sportSheetInner">
+      <div class="sheet-head"><div class="sheet-title">Verknüpfung einfügen</div><button class="sheet-x" id="linkClose">${IC.x}</button></div>
+      <div class="sheet-body">${body}</div>
+    </div>`;
+    $('linkClose').onclick = () => ov.remove();
+    if (pickArea){
+      const lb = $('linkBack'); if (lb) lb.onclick = () => { pickArea = null; draw(); };
+    }
+    ov.querySelectorAll('[data-pickarea]').forEach(b => b.onclick = () => { pickArea = b.dataset.pickarea; draw(); });
+    ov.querySelectorAll('[data-picktarget]').forEach(b => b.onclick = () => {
+      const [kind, id] = b.dataset.picktarget.split(':');
+      const lnk = kind === 'area' ? { kind:'area', areaId:id } : { kind, id };
+      note.links.push(lnk);
+      noteSave(note);
+      ov.remove(); render(); showToast('Verknüpfung hinzugefügt ✓');
+    });
+  }
+  ov.onmousedown = e => { if (e.target === ov) ov.remove(); };
+  draw();
 }
 
 /* ── Bereiche: Speicher-Helper ── */
@@ -2086,7 +2402,7 @@ function noteDelete(id){ NOTES = NOTES.filter(n => n.id !== id); cloudDelete(id)
    Bucket "documents" muss in Supabase existieren (öffentlich lesbar).
    Datei wird hochgeladen, öffentliche URL geholt, als note (type:doc) gespeichert. */
 const DOC_BUCKET = 'documents';
-async function uploadDoc(areaId, file){
+async function uploadDoc(areaId, file, folderId){
   // Größe begrenzen (10 MB), sonst sprengt es Gratis-Speicher schnell
   if (file.size > 10*1024*1024){ showToast('Datei zu groß (max. 10 MB)'); return; }
   if (!sb){ showToast('Keine Verbindung'); return; }
@@ -2101,6 +2417,7 @@ async function uploadDoc(areaId, file){
       _kind:'note', id:'doc-'+uid(), areaId, type:'doc',
       title: file.name, docPath: path,
       docType: file.type, size: file.size,
+      folderId: folderId || null,
       createdAt:Date.now(), updatedAt:Date.now(),
     };
     NOTES.unshift(doc);
@@ -2160,7 +2477,10 @@ function renderSportPlan(){
     </button>`;
   });
   h += `</div>`;
-  h += `<button class="sport-reset" data-sportreset="1">Plan auf Standard zurücksetzen</button>`;
+  h += `<div class="sport-resetrow">
+    <button class="sport-reset" data-sportreset="1">Standard-Plan laden</button>
+    <button class="sport-reset empty" data-sportempty="1">Plan leeren (selbst bauen)</button>
+  </div>`;
   return h;
 }
 
@@ -2204,6 +2524,7 @@ function renderSportDay(i){
   });
   h += `</div>`;
   h += `<button class="sport-addex" data-addex="${i}">${IC.plus} Übung hinzufügen</button>`;
+  if (day.exercises.length) h += `<button class="sport-dayclear" data-dayclear="${i}">${IC.trash2||IC.trash} Diesen Tag leeren</button>`;
   return h;
 }
 
@@ -2363,6 +2684,10 @@ function renderSportFood(){
     </button>`;
   });
   h += `</div>`;
+  h += `<div class="sport-resetrow">
+    <button class="sport-reset" data-nutristd="1">Standard-Essensplan laden</button>
+    <button class="sport-reset empty" data-nutriempty="1">Essensplan leeren (selbst bauen)</button>
+  </div>`;
   return h;
 }
 
@@ -2561,7 +2886,7 @@ function renderSettings(){
 
 // Zentrale Navigations-Definition (Reihenfolge = Anzeige). To-Dos immer zuerst.
 const NAV = [
-  { id:'overview', label:'Übersicht',     icon:'sun'      },
+  { id:'overview', label:'To-Do\'s',      icon:'sun'      },
   { id:'bereiche', label:'Bereiche',      icon:'bullseye' },
   { id:'links',    label:'Links',         icon:'link'     },
   { id:'trash',    label:'Papierkorb',    icon:'trash'    },
@@ -2641,6 +2966,49 @@ function applySearch(list){
     (t.notes||'').toLowerCase().includes(q)
   );
 }
+// Umfangreiche Filter (kombinierbar) anwenden
+function applyFilters(list){
+  let out = list;
+  if (FILTER.prio && FILTER.prio.length){
+    out = out.filter(t => FILTER.prio.includes(t.priority || 0) || (FILTER.prio.includes(0) && !t.priority));
+  }
+  if (FILTER.cat && FILTER.cat.length){
+    out = out.filter(t => t.category && FILTER.cat.includes(t.category));
+  }
+  if (FILTER.fav){
+    out = out.filter(t => t.fav);
+  }
+  if (FILTER.due && FILTER.due !== 'any'){
+    const today = startOfDay(new Date()).getTime();
+    const weekEnd = today + 7*86400000;
+    out = out.filter(t => {
+      if (FILTER.due === 'nodate') return !t.due;
+      if (!t.due) return false;
+      const d = startOfDay(new Date(t.due)).getTime();
+      if (FILTER.due === 'overdue') return d < today;
+      if (FILTER.due === 'today')   return d === today;
+      if (FILTER.due === 'week')    return d >= today && d <= weekEnd;
+      return true;
+    });
+  }
+  return out;
+}
+// Sind aktuell Filter aktiv?
+function filterCount(){
+  let n = 0;
+  if (FILTER.prio.length) n += FILTER.prio.length;
+  if (FILTER.cat.length) n += FILTER.cat.length;
+  if (FILTER.fav) n++;
+  if (FILTER.due && FILTER.due !== 'any') n++;
+  return n;
+}
+function resetFilters(){ FILTER = { prio:[], cat:[], due:'any', fav:false }; }
+// Alle vorhandenen Kategorien aus Aufgaben sammeln
+function allTaskCategories(){
+  const set = new Set();
+  TASKS.forEach(t => { if (t.category) set.add(t.category); });
+  return Array.from(set).sort((a,b)=>a.localeCompare(b));
+}
 
 /* ═══════════════ APP-ZUSTAND MERKEN (fühlt sich nativ an) ═══════════════
    Speichert die aktuelle Ansicht + Scrollposition, damit die App nach
@@ -2680,6 +3048,36 @@ function restoreUIState(){
 }
 function clearUIState(){ try { localStorage.removeItem(UI_STATE_KEY); } catch(e){} }
 
+// Filter-Panel (kombinierbare Kriterien)
+function renderFilterPanel(){
+  const cats = allTaskCategories();
+  const dueOpts = [['any','Alle'],['overdue','Überfällig'],['today','Heute'],['week','Diese Woche'],['nodate','Ohne Datum']];
+  let h = `<div class="filter-panel">`;
+  h += `<div class="filter-group"><div class="filter-lbl">Priorität</div><div class="filter-chips">`;
+  [[1,'Dringend'],[2,'Wichtig'],[3,'Normal']].forEach(([p,lbl]) => {
+    h += `<button class="filter-chip ${FILTER.prio.includes(p)?'on':''}" data-fprio="${p}">${esc(lbl)}</button>`;
+  });
+  h += `</div></div>`;
+  h += `<div class="filter-group"><div class="filter-lbl">Fälligkeit</div><div class="filter-chips">`;
+  dueOpts.forEach(([v,lbl]) => {
+    h += `<button class="filter-chip ${FILTER.due===v?'on':''}" data-fdue="${v}">${esc(lbl)}</button>`;
+  });
+  h += `</div></div>`;
+  if (cats.length){
+    h += `<div class="filter-group"><div class="filter-lbl">Bereich</div><div class="filter-chips">`;
+    cats.forEach(c => {
+      h += `<button class="filter-chip ${FILTER.cat.includes(c)?'on':''}" data-fcat="${esc(c)}">${esc(c)}</button>`;
+    });
+    h += `</div></div>`;
+  }
+  h += `<div class="filter-group"><div class="filter-chips">
+    <button class="filter-chip ${FILTER.fav?'on':''}" data-ffav="1">${IC.star||'★'} Nur Favoriten</button>
+  </div></div>`;
+  if (filterCount()) h += `<button class="filter-reset" id="filterReset">Filter zurücksetzen</button>`;
+  h += `</div>`;
+  return h;
+}
+
 function render(){
   const active = TASKS.filter(t => !t.done).sort((a,b) => score(a)-score(b));
   const completed = TASKS.filter(t => t.done);
@@ -2703,20 +3101,23 @@ function render(){
       <button class="subtab ${OV_MODE==='areas'?'on':''}" data-ov="areas">${IC.layers}Bereiche</button>
     </div>`;
 
-    // Suche + Sortierung — bei Heute/Alle sinnvoll
+    // Suche + Filter + Sortierung — bei Heute/Alle sinnvoll
     if (OV_MODE === 'today' || OV_MODE === 'all'){
+      const fCount = filterCount();
       h += `<div class="toolbar">
         <div class="search-box">${IC.search}<input id="searchInput" placeholder="Aufgabe suchen…" value="${esc(SEARCH)}">${SEARCH?`<button class="search-clear" id="searchClear">${IC.x}</button>`:''}</div>
+        <button class="filter-btn ${fCount?'active':''}" id="filterBtn">${IC.filter||IC.sort}${fCount?`<span class="filter-badge">${fCount}</span>`:''}</button>
         <div class="sort-box">
           <button class="sort-btn" id="sortBtn">${IC.sort}<span>${SORT_LABELS[SORT]}${SORT!=='smart'?` ${SORT_DIR==='asc'?'↑':'↓'}${SORT2!=='none'&&SORT2!==SORT?` ·${SORT_LABELS[SORT2]}`:''}`:''}</span></button>
         </div>
       </div>`;
+      if (FILTER_OPEN) h += renderFilterPanel();
     }
 
-    // Daten je nach Modus aufbereiten (Suche + Sortierung anwenden)
-    let act = applySearch(active);
+    // Daten je nach Modus aufbereiten (Suche + Filter + Sortierung anwenden)
+    let act = applyFilters(applySearch(active));
     if (OV_MODE === 'today')      h += renderToday(sortTasks(act), completed);
-    else if (OV_MODE === 'all')   h += renderList(sortTasks(act), applySearch(completed));
+    else if (OV_MODE === 'all')   h += renderList(sortTasks(act), applyFilters(applySearch(completed)));
     else if (OV_MODE === 'matrix')h += renderMatrix(act);
     else if (OV_MODE === 'areas') h += renderAreas(active);
   }
@@ -2755,12 +3156,12 @@ function bindRoot(){
     AREA_OPEN = b.dataset.areaopen;
     const a = areaById(AREA_OPEN);
     AREA_TAB = (a && a.hasTools) ? 'tools' : 'notes';   // Bereiche mit Tools (Sport) starten dort
-    NOTE_OPEN = null; SPORT_TAB = 'plan'; SPORT_DAY = null;
+    NOTE_OPEN = null; SPORT_TAB = 'plan'; SPORT_DAY = null; DOC_FOLDER = null;
     render(); window.scrollTo(0,0);
   });
   const aBack = document.querySelector('[data-areaback]');
-  if (aBack) aBack.onclick = () => { AREA_OPEN = null; SPORT_DAY = null; render(); window.scrollTo(0,0); };
-  document.querySelectorAll('[data-areatab]').forEach(b => b.onclick = () => { AREA_TAB = b.dataset.areatab; SPORT_DAY = null; render(); window.scrollTo(0,0); });
+  if (aBack) aBack.onclick = () => { AREA_OPEN = null; SPORT_DAY = null; DOC_FOLDER = null; render(); window.scrollTo(0,0); };
+  document.querySelectorAll('[data-areatab]').forEach(b => b.onclick = () => { AREA_TAB = b.dataset.areatab; SPORT_DAY = null; DOC_FOLDER = null; render(); window.scrollTo(0,0); });
   const aAdd = document.querySelector('[data-areaadd]');
   if (aAdd) aAdd.onclick = () => {
     const name = prompt('Name des neuen Bereichs (z. B. Auto, Steuer, Rechtsschutz, Studium):');
@@ -2787,9 +3188,23 @@ function bindRoot(){
   if (sBack) sBack.onclick = () => { SPORT_DAY = null; render(); window.scrollTo(0,0); };
   const sReset = document.querySelector('[data-sportreset]');
   if (sReset) sReset.onclick = () => {
-    if (confirm('Trainingsplan wirklich auf den Standard zurücksetzen? Deine eingetragenen Sätze gehen dabei verloren.')){
-      WORKOUT = defaultWorkoutPlan(); pushUpsert(WORKOUT, false); SPORT_DAY = null; render();
+    if (confirm('Standard-Trainingsplan laden? Dein aktueller Plan und eingetragene Sätze werden ersetzt.')){
+      const keepNutri = WORKOUT && WORKOUT.nutrition;
+      WORKOUT = defaultWorkoutPlan();
+      if (keepNutri) WORKOUT.nutrition = keepNutri;   // Ernährung nicht anfassen
+      pushUpsert(WORKOUT, false); SPORT_DAY = null; render();
     }
+  };
+  const sEmpty = document.querySelector('[data-sportempty]');
+  if (sEmpty) sEmpty.onclick = () => {
+    if (confirm('Trainingsplan komplett leeren, um selbst von Grund auf zu bauen? Alle Übungen und eingetragenen Sätze werden entfernt.')){
+      resetWorkout(); SPORT_DAY = null; render();
+    }
+  };
+  const dayClear = document.querySelector('[data-dayclear]');
+  if (dayClear) dayClear.onclick = () => {
+    const i = +dayClear.dataset.dayclear;
+    if (confirm('Alle Übungen dieses Tages entfernen?')){ clearWorkoutDay(i); render(); }
   };
   document.querySelectorAll('[data-exlog]').forEach(b => b.onclick = () => {
     const [i,j] = b.dataset.exlog.split(':').map(Number);
@@ -2850,6 +3265,18 @@ function bindRoot(){
   if (nGoal) nGoal.onclick = () => openGoalSheet();
   const nShop = document.querySelector('[data-nutrishop]');
   if (nShop) nShop.onclick = () => openShoppingSheet();
+  const nStd = document.querySelector('[data-nutristd]');
+  if (nStd) nStd.onclick = () => {
+    if (confirm('Standard-Essensplan laden? Dein aktueller Essensplan wird ersetzt (Trainingsplan bleibt).')){
+      WORKOUT.nutrition = defaultNutrition(); pushUpsert(WORKOUT, false); NUTRI_DAY = null; render();
+    }
+  };
+  const nEmpty = document.querySelector('[data-nutriempty]');
+  if (nEmpty) nEmpty.onclick = () => {
+    if (confirm('Essensplan komplett leeren, um selbst zu bauen? Alle Rezepte und Mahlzeiten werden entfernt (Trainingsplan bleibt).')){
+      resetNutrition(); NUTRI_DAY = null; render();
+    }
+  };
 
   // ── Notiz-Detail-Handler ──
   const noteBack = document.querySelector('[data-noteback]');
@@ -2865,11 +3292,12 @@ function bindRoot(){
   const docUp = document.querySelector('[data-docupload]');
   if (docUp){
     const areaId = docUp.dataset.docupload;
+    const intoFolder = docUp.dataset.intofolder || null;
     const fileInput = $('docFileInput');
     docUp.onclick = () => fileInput && fileInput.click();
     if (fileInput) fileInput.onchange = async e => {
       const file = e.target.files && e.target.files[0];
-      if (file) await uploadDoc(areaId, file);
+      if (file) await uploadDoc(areaId, file, intoFolder);
     };
   }
   document.querySelectorAll('[data-docdel]').forEach(b => b.onclick = () => {
@@ -2881,7 +3309,6 @@ function bindRoot(){
     if (!doc || !doc.docPath || !sb){ showToast('Dokument nicht gefunden'); return; }
     showToast('Öffne…');
     try {
-      // Zeitlich begrenzten Zugriffs-Link erzeugen (gilt 1 Stunde)
       const { data, error } = await sb.storage.from(DOC_BUCKET).createSignedUrl(doc.docPath, 3600);
       if (error) throw error;
       window.open(data.signedUrl, '_blank', 'noopener');
@@ -2890,6 +3317,28 @@ function bindRoot(){
       showToast('Konnte nicht öffnen');
     }
   });
+  // Ordner: anlegen, öffnen, zurück, löschen
+  const newFolder = document.querySelector('[data-newfolder]');
+  if (newFolder) newFolder.onclick = () => {
+    const name = prompt('Name des Ordners (z. B. Versicherung, Steuer 2025):');
+    if (name && name.trim()){ docFolderCreate(newFolder.dataset.newfolder, name); render(); }
+  };
+  document.querySelectorAll('[data-folderopen]').forEach(b => b.onclick = e => {
+    if (e.target.closest('[data-folderdel]')) return;
+    DOC_FOLDER = b.dataset.folderopen; render(); window.scrollTo(0,0);
+  });
+  const folderBack = document.querySelector('[data-docfolderback]');
+  if (folderBack) folderBack.onclick = () => { DOC_FOLDER = null; render(); window.scrollTo(0,0); };
+  document.querySelectorAll('[data-folderdel]').forEach(b => b.onclick = e => {
+    e.stopPropagation();
+    const f = folderById(b.dataset.folderdel);
+    const cnt = f ? docsInFolder(f.areaId, f.id).length : 0;
+    if (confirm(`Ordner „${f?f.title:''}" löschen?${cnt?` Die ${cnt} Dokumente wandern zurück in die Übersicht (werden nicht gelöscht).`:''}`)){
+      docFolderDelete(b.dataset.folderdel); render();
+    }
+  });
+  // Dokument in Ordner verschieben
+  document.querySelectorAll('[data-docmove]').forEach(b => b.onclick = () => openMoveSheet(b.dataset.docmove));
   // Notiz-Detail: Titel + Body live speichern
   const nt = $('noteTitle');
   if (nt) nt.oninput = () => { const n = NOTES.find(x=>x.id===NOTE_OPEN); if (n){ n.title = nt.value; noteSave(n); } };
@@ -2924,6 +3373,29 @@ function bindRoot(){
       noteDelete(noteDel.dataset.notedelete); NOTE_OPEN = null; render();
     }
   };
+  // Verknüpfungen
+  const addNoteLink = document.querySelector('[data-noteaddlink]');
+  if (addNoteLink) addNoteLink.onclick = () => openLinkPicker(NOTE_OPEN);
+  document.querySelectorAll('[data-notelinkdel]').forEach(b => b.onclick = e => {
+    e.stopPropagation();
+    const n = NOTES.find(x => x.id === NOTE_OPEN);
+    if (n && n.links){ n.links.splice(+b.dataset.notelinkdel, 1); noteSave(n); render(); }
+  });
+  document.querySelectorAll('[data-notelinkgo]').forEach(b => b.onclick = e => {
+    if (e.target.closest('[data-notelinkdel]')) return;
+    const n = NOTES.find(x => x.id === NOTE_OPEN);
+    if (!n || !n.links) return;
+    const target = resolveNoteLink(n.links[+b.dataset.notelinkgo]);
+    if (!target){ showToast('Ziel nicht gefunden'); return; }
+    // Zum Ziel navigieren
+    NOTE_OPEN = null;
+    VIEW = 'bereiche';
+    AREA_OPEN = target.areaId;
+    AREA_TAB = 'docs';
+    DOC_FOLDER = target.folderId || null;
+    render(); window.scrollTo(0,0);
+    if (target.docId) showToast('Dokument im Ordner antippen zum Öffnen');
+  });
 
   const openTrash = $('openTrashBtn');
   if (openTrash) openTrash.onclick = () => { VIEW = 'trash'; render(); window.scrollTo(0,0); };
@@ -2950,6 +3422,34 @@ function bindRoot(){
   // Sortierung — kleines Menü
   const sortBtn = $('sortBtn');
   if (sortBtn) sortBtn.onclick = e => { e.stopPropagation(); openSortMenu(sortBtn); };
+
+  // Filter-Panel
+  const filterBtn = $('filterBtn');
+  if (filterBtn) filterBtn.onclick = () => { FILTER_OPEN = !FILTER_OPEN; render(); };
+  // Priorität (Mehrfachauswahl, togglen)
+  document.querySelectorAll('[data-fprio]').forEach(b => b.onclick = () => {
+    const p = +b.dataset.fprio;
+    const i = FILTER.prio.indexOf(p);
+    if (i >= 0) FILTER.prio.splice(i,1); else FILTER.prio.push(p);
+    render();
+  });
+  // Fälligkeit (Einzelauswahl)
+  document.querySelectorAll('[data-fdue]').forEach(b => b.onclick = () => {
+    FILTER.due = b.dataset.fdue; render();
+  });
+  // Kategorie (Mehrfachauswahl)
+  document.querySelectorAll('[data-fcat]').forEach(b => b.onclick = () => {
+    const c = b.dataset.fcat;
+    const i = FILTER.cat.indexOf(c);
+    if (i >= 0) FILTER.cat.splice(i,1); else FILTER.cat.push(c);
+    render();
+  });
+  // Favoriten-Toggle
+  const ffav = document.querySelector('[data-ffav]');
+  if (ffav) ffav.onclick = () => { FILTER.fav = !FILTER.fav; render(); };
+  // Reset
+  const fReset = $('filterReset');
+  if (fReset) fReset.onclick = () => { resetFilters(); render(); };
 
   const qi = $('quickInput');
   if (qi){
@@ -3527,6 +4027,11 @@ function openExerciseSheet(i, j){
         <div class="sec-lbl">Name der neuen Übung</div>
         <div class="field-card"><input class="cat-in-full" id="exNewName" placeholder="z. B. Beinstrecker"></div>
       </div>
+      <div id="exRenameWrap" style="display:${ex.exId?'block':'none'}">
+        <div class="sec-lbl">Name bearbeiten</div>
+        <div class="field-card"><input class="cat-in-full" id="exRenameName" placeholder="Übungsname" value="${ex.exId?esc(exName(WORKOUT, ex.exId)):''}"></div>
+        <div class="set-hint">Ändert den Namen überall, wo diese Übung verwendet wird.</div>
+      </div>
       ${isCardio ? `
         <div class="sec-lbl">Ziel-Dauer / Vorgabe</div>
         <div class="field-card"><input class="cat-in-full" id="exReps" value="${esc(ex.reps||'')}" placeholder="z. B. 30–40 min"></div>
@@ -3552,10 +4057,21 @@ function openExerciseSheet(i, j){
   enhanceNumberInputs(ov);
   $('sportClose').onclick = closeSportSheet;
 
-  // "Neue Übung" einblenden
+  // "Neue Übung" + "Name bearbeiten" ein-/ausblenden
   const sel = $('exSelect');
   const newWrap = $('exNewWrap');
-  sel.onchange = () => { newWrap.style.display = sel.value === '__new__' ? 'block' : 'none'; };
+  const renameWrap = $('exRenameWrap');
+  const renameInput = $('exRenameName');
+  sel.onchange = () => {
+    const isNewSel = sel.value === '__new__';
+    newWrap.style.display = isNewSel ? 'block' : 'none';
+    renameWrap.style.display = (!isNewSel && sel.value) ? 'block' : 'none';
+    // Rename-Feld mit aktuellem Namen der gewählten Übung füllen
+    if (!isNewSel && sel.value){
+      const e = WORKOUT.exDb.find(x => x.id === sel.value);
+      if (e && renameInput) renameInput.value = e.name;
+    }
+  };
 
   $('exSave').onclick = () => {
     let exId = sel.value;
@@ -3563,10 +4079,21 @@ function openExerciseSheet(i, j){
     if (exId === '__new__'){
       const newName = ($('exNewName').value||'').trim();
       if (!newName){ showToast('Bitte Namen der neuen Übung eingeben'); return; }
-      // Existiert schon? (case-insensitiv) → wiederverwenden, sonst neu
       const exist = WORKOUT.exDb.find(e => e.name.toLowerCase() === newName.toLowerCase());
       if (exist){ exId = exist.id; }
       else { exId = uid(); WORKOUT.exDb.push({ id: exId, name: newName, muscle: isCardio?'Cardio':'' }); }
+    } else if (exId){
+      // Bestehende Übung: Name editierbar — Änderung in DB übernehmen
+      const newName = (renameInput && renameInput.value || '').trim();
+      if (newName){
+        const dbEx = WORKOUT.exDb.find(e => e.id === exId);
+        if (dbEx && dbEx.name !== newName){
+          // Kollision mit anderer Übung gleichen Namens vermeiden
+          const clash = WORKOUT.exDb.find(e => e.id !== exId && e.name.toLowerCase() === newName.toLowerCase());
+          if (clash){ showToast('Eine andere Übung heißt schon so'); return; }
+          dbEx.name = newName;
+        }
+      }
     }
     if (!exId){ showToast('Bitte eine Übung wählen'); return; }
     const reps = ($('exReps').value||'').trim() || '–';
