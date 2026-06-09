@@ -459,6 +459,25 @@ svg{width:18px;height:18px;display:block;}
 .sport-resetrow .sport-reset:hover{border-color:#3a362e;color:var(--text);}
 .sport-resetrow .sport-reset.empty:hover{border-color:rgba(255,93,77,.35);color:var(--p1);}
 .sport-dayclear{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:10px;background:none;border:1px solid var(--line);color:var(--faint);border-radius:10px;padding:11px;font-size:13px;cursor:pointer;transition:.13s;}
+.sport-day-head-r{display:flex;align-items:center;gap:10px;}
+.sport-day-edit{background:none;border:none;color:var(--faint);cursor:pointer;padding:6px;display:flex;transition:.13s;}
+.sport-day-edit svg{width:17px;height:17px;}
+.sport-day-edit:hover{color:var(--text);}
+.daytype-seg{display:flex;gap:8px;margin-bottom:18px;}
+.daytype-opt{flex:1;background:var(--card-hi);border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:12px 8px;font-size:13.5px;cursor:pointer;transition:.13s;}
+.daytype-opt:hover{border-color:#3a362e;color:var(--text);}
+.daytype-opt.on{background:var(--accent);color:#10100c;border-color:var(--accent);font-weight:600;}
+.nutri-meal-empty{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:1px dashed var(--line);border-radius:11px;padding:14px 15px;cursor:pointer;transition:.13s;margin-bottom:2px;}
+.nutri-meal-empty:hover{border-color:var(--accent-dim);}
+.nutri-meal-empty-slot{font-family:'JetBrains Mono';font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--faint);}
+.nutri-meal-empty-add{display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);}
+.nutri-meal-empty-add svg{width:14px;height:14px;}
+.nutri-meal-x{background:none;border:none;color:var(--faint);cursor:pointer;padding:8px;flex-shrink:0;display:flex;align-items:center;transition:.13s;}
+.nutri-meal-x svg{width:15px;height:15px;}
+.nutri-meal-x:hover{color:var(--p1);}
+.nutri-newrecipe{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--card-hi);border:1px solid var(--line);color:var(--text);border-radius:11px;padding:12px;font-size:14px;cursor:pointer;margin-top:14px;transition:.13s;}
+.nutri-newrecipe svg{width:15px;height:15px;}
+.nutri-newrecipe:hover{border-color:var(--accent-dim);}
 .sport-dayclear svg{width:14px;height:14px;}
 .sport-dayclear:hover{border-color:rgba(255,93,77,.35);color:var(--p1);}
 .sport-back{display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--muted);font-size:13.5px;cursor:pointer;padding:4px 0 14px;transition:.13s;}
@@ -1010,14 +1029,19 @@ function emptyWorkoutPlan(){
     ]
   };
 }
-/* Leere Ernährung: keine Rezepte/Wochenplan, nur Standard-Ziele — zum selbst Befüllen. */
+/* Leere Ernährung: gültige, aber leere Tagesstruktur — zum selbst Befüllen.
+   Wichtig: KEINE null-Pläne (sonst Absturz beim Rendern), sondern leere meals. */
 function emptyNutrition(){
+  const emptyDay = () => ({
+    a: { label:'Option A', meals:{} },
+    b: { label:'Option B', meals:{} },
+  });
   return {
     _nutver: 3,
     goals: { kcal:2300, protein:170, fat:70 },
     proteinToday: {},
     recipes: {},
-    week: [ {a:null,b:null},{a:null,b:null},{a:null,b:null},{a:null,b:null},{a:null,b:null},{a:null,b:null},{a:null,b:null} ],
+    week: [ emptyDay(),emptyDay(),emptyDay(),emptyDay(),emptyDay(),emptyDay(),emptyDay() ],
     chosen: {},
   };
 }
@@ -1227,6 +1251,7 @@ const IC = {
   filter:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>',
   star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
   folder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>',
+  key:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3"/></svg>',
   activity:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
   grip:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
   image:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
@@ -1499,6 +1524,44 @@ async function doLogout(){
   USER = null; TASKS = []; TRASH = [];
   $('app').classList.remove('shown');
   $('login').style.display = 'flex';
+}
+
+/* Passwort direkt in DoNow ändern — läuft über Supabase-Auth im Hintergrund,
+   der Nutzer sieht davon nichts. Perfekt für die Übergabe an Freunde. */
+function openPasswordSheet(){
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  ov.innerHTML = `<div class="sheet" id="sportSheetInner">
+    <div class="sheet-head"><div class="sheet-title">Passwort ändern</div><button class="sheet-x" id="pwClose">${IC.x}</button></div>
+    <div class="sheet-body">
+      <div class="sec-lbl">Neues Passwort</div>
+      <div class="field-card"><input class="cat-in-full" id="pwNew" type="password" placeholder="mindestens 6 Zeichen" autocomplete="new-password"></div>
+      <div class="sec-lbl">Neues Passwort wiederholen</div>
+      <div class="field-card"><input class="cat-in-full" id="pwNew2" type="password" placeholder="nochmal eingeben" autocomplete="new-password"></div>
+      <button class="sheet-save" id="pwSave">Passwort speichern</button>
+      <div class="set-hint" style="margin-top:10px">Du bleibst danach angemeldet. Beim nächsten Login gilt das neue Passwort.</div>
+    </div>
+  </div>`;
+  ov.onmousedown = e => { if (e.target === ov) ov.remove(); };
+  document.body.appendChild(ov);
+  $('pwClose').onclick = () => ov.remove();
+  $('pwSave').onclick = async () => {
+    const p1 = $('pwNew').value || '';
+    const p2 = $('pwNew2').value || '';
+    if (p1.length < 6){ showToast('Mindestens 6 Zeichen'); return; }
+    if (p1 !== p2){ showToast('Passwörter stimmen nicht überein'); return; }
+    if (!sb){ showToast('Keine Verbindung'); return; }
+    const btn = $('pwSave'); btn.disabled = true; btn.textContent = 'Speichere…';
+    try {
+      const { error } = await sb.auth.updateUser({ password: p1 });
+      if (error) throw error;
+      ov.remove(); showToast('Passwort geändert ✓');
+    } catch(e){
+      console.warn('Passwort-Fehler:', e.message);
+      btn.disabled = false; btn.textContent = 'Passwort speichern';
+      showToast('Fehler: ' + (e.message||'unbekannt'));
+    }
+  };
 }
 
 async function onLoggedIn(session){
@@ -2510,7 +2573,10 @@ function renderSportDay(i){
   let h = `<button class="sport-back" data-sportback="1">${IC.chevLeft} Zurück zur Woche</button>`;
   h += `<div class="sport-day-head ${day.type}">
     <div><div class="sport-day-wd">${day.wd}</div><div class="sport-day-title">${esc(day.title)}</div></div>
-    <span class="sport-type-badge ${day.type}">${SPORT_TYPE_LBL[day.type]}</span>
+    <div class="sport-day-head-r">
+      <span class="sport-type-badge ${day.type}">${SPORT_TYPE_LBL[day.type]}</span>
+      <button class="sport-day-edit" data-dayedit="${i}" aria-label="Tag bearbeiten">${IC.edit}</button>
+    </div>
   </div>`;
   if (day.type === 'rest'){
     h += `<div class="sport-rest-note">Heute ist Ruhetag. Erholung ist Teil des Plans — Muskeln wachsen in der Pause.</div>`;
@@ -2547,6 +2613,50 @@ function renderSportDay(i){
   h += `<button class="sport-addex" data-addex="${i}">${IC.plus} Übung hinzufügen</button>`;
   if (day.exercises.length) h += `<button class="sport-dayclear" data-dayclear="${i}">${IC.trash2||IC.trash} Diesen Tag leeren</button>`;
   return h;
+}
+
+/* Trainingstag bearbeiten: Typ (Kraft/Cardio/Ruhetag) + Titel.
+   Wechsel auf Ruhetag entfernt Übungen nach Rückfrage. */
+function openDayEditSheet(i){
+  const day = WORKOUT.days[i];
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  const types = [['kraft','Kraft'],['cardio','Cardio / Ausdauer'],['rest','Ruhetag']];
+  ov.innerHTML = `<div class="sheet" id="sportSheetInner">
+    <div class="sheet-head"><div class="sheet-title">${esc(day.wd)} — Tag bearbeiten</div><button class="sheet-x" id="dayClose">${IC.x}</button></div>
+    <div class="sheet-body">
+      <div class="sec-lbl">Art des Tages</div>
+      <div class="daytype-seg">
+        ${types.map(([v,lbl])=>`<button class="daytype-opt ${day.type===v?'on':''}" data-daytype="${v}">${lbl}</button>`).join('')}
+      </div>
+      <div class="sec-lbl">Name des Tages</div>
+      <div class="field-card"><input class="cat-in-full" id="dayTitle" value="${esc(day.title||'')}" placeholder="z. B. Oberkörper, Push, Beine"></div>
+      <button class="sheet-save" id="daySave">Speichern</button>
+    </div>
+  </div>`;
+  ov.onmousedown = e => { if (e.target === ov) ov.remove(); };
+  document.body.appendChild(ov);
+  $('dayClose').onclick = () => ov.remove();
+  let chosenType = day.type;
+  ov.querySelectorAll('[data-daytype]').forEach(b => b.onclick = () => {
+    chosenType = b.dataset.daytype;
+    ov.querySelectorAll('[data-daytype]').forEach(x => x.classList.toggle('on', x===b));
+    // Titel-Vorschlag bei Ruhetag
+    const ti = $('dayTitle');
+    if (chosenType === 'rest' && (!ti.value || ti.value.startsWith('Tag'))) ti.value = 'Ruhetag';
+  });
+  $('daySave').onclick = () => {
+    const newTitle = ($('dayTitle').value||'').trim() || day.title;
+    // Wechsel auf Ruhetag mit vorhandenen Übungen → Rückfrage
+    if (chosenType === 'rest' && day.exercises.length){
+      if (!confirm('Als Ruhetag markieren? Die Übungen dieses Tages werden entfernt.')) return;
+      day.exercises = [];
+    }
+    day.type = chosenType;
+    day.title = newTitle;
+    pushUpsert(WORKOUT, false);
+    ov.remove(); render(); showToast('Tag aktualisiert ✓');
+  };
 }
 
 function fmtLogDate(ts){
@@ -2690,16 +2800,17 @@ function renderSportFood(){
   h += `<button class="nutri-shop-btn" data-nutrishop="1">${IC.cart||IC.list} Einkaufsliste für die Woche</button>`;
   h += `<div class="sport-week">`;
   WD_CAL.forEach((wd, i) => {
-    const day = n.week[i];
+    const day = n.week[i] || { a:{label:'Option A',meals:{}}, b:{label:'Option B',meals:{}} };
     const isToday = i === todayIdx;
     const choice = n.chosen[dateKeyForWeekday(i)] || 'a';
-    const plan = day[choice];
-    const mealCount = Object.values(plan.meals).filter(Boolean).length;
+    const plan = day[choice] || day.a || { label:'Option A', meals:{} };
+    const meals = (plan && plan.meals) || {};
+    const mealCount = Object.values(meals).filter(Boolean).length;
     h += `<button class="sport-daycard nutri ${isToday?'today':''}" data-nutriday="${i}">
       <div class="sport-daycard-l">
         <span class="sport-wd">${WD_CAL_FULL[i]}${isToday?' · heute':''}</span>
-        <span class="sport-daytitle">${plan.label}</span>
-        <span class="sport-daymeta">${mealCount} Mahlzeiten · ca. ${dayPlanProtein(n, plan)} g Protein</span>
+        <span class="sport-daytitle">${(plan&&plan.label)||'Option A'}</span>
+        <span class="sport-daymeta">${mealCount===0?'Noch leer':`${mealCount} Mahlzeiten · ca. ${dayPlanProtein(n, plan)} g Protein`}</span>
       </div>
       <span class="sport-daycard-r">${IC.chevRight}</span>
     </button>`;
@@ -2722,21 +2833,27 @@ function dateKeyForWeekday(i){
 }
 function dayPlanProtein(n, plan){
   let sum = 0;
-  Object.values(plan.meals).forEach(rid => { if (rid && n.recipes[rid]) sum += n.recipes[rid].protein||0; });
+  const meals = (plan && plan.meals) || {};
+  Object.values(meals).forEach(rid => { if (rid && n.recipes[rid]) sum += n.recipes[rid].protein||0; });
   return sum;
 }
 function dayPlanKcal(n, plan){
   let sum = 0;
-  Object.values(plan.meals).forEach(rid => { if (rid && n.recipes[rid]) sum += n.recipes[rid].kcal||0; });
+  const meals = (plan && plan.meals) || {};
+  Object.values(meals).forEach(rid => { if (rid && n.recipes[rid]) sum += n.recipes[rid].kcal||0; });
   return sum;
 }
 
 function renderNutriDay(i){
   const n = getNutrition();
+  // null-sicher: fehlende Tagesstruktur reparieren
+  if (!n.week[i]) n.week[i] = { a:{label:'Option A',meals:{}}, b:{label:'Option B',meals:{}} };
   const day = n.week[i];
   const dKey = dateKeyForWeekday(i);
   const choice = n.chosen[dKey] || 'a';
+  if (!day[choice]) day[choice] = { label: choice==='a'?'Option A':'Option B', meals:{} };
   const plan = day[choice];
+  if (!plan.meals) plan.meals = {};
 
   let h = `<button class="sport-back" data-nutriback="1">${IC.chevLeft} Zurück zur Woche</button>`;
   h += `<div class="sport-day-head nutri">
@@ -2749,31 +2866,135 @@ function renderNutriDay(i){
   </div>`;
 
   const eaten = (n.proteinToday[dKey] && n.proteinToday[dKey].g) || 0;
-  const pct = Math.min(100, Math.round(eaten / n.goals.protein * 100));
+  const pct = n.goals.protein ? Math.min(100, Math.round(eaten / n.goals.protein * 100)) : 0;
   h += `<div class="nutri-protein">
     <div class="nutri-protein-top"><span>Protein heute</span><span class="nutri-protein-val">${eaten} / ${n.goals.protein} g</span></div>
     <div class="nutri-protein-bar"><div class="nutri-protein-fill" style="width:${pct}%"></div></div>
   </div>`;
 
   const done = (n.proteinToday[dKey] && n.proteinToday[dKey].done) || {};
+  const slots = ['frueh','mittag','abend','snack'];
+  const hasAny = slots.some(s => plan.meals[s] && n.recipes[plan.meals[s]]);
   h += `<div class="nutri-meals">`;
-  ['frueh','mittag','abend','snack'].forEach(slot => {
+  slots.forEach(slot => {
     const rid = plan.meals[slot];
-    if (!rid || !n.recipes[rid]) return;
-    const r = n.recipes[rid];
-    const checked = !!done[slot];
-    h += `<div class="nutri-meal ${checked?'done':''}">
-      <button class="nutri-check ${checked?'on':''}" data-nutricheck="${i}:${slot}" aria-label="Abhaken">${checked?IC.check_sm:''}</button>
-      <button class="nutri-meal-body" data-reciperid="${rid}">
-        <div class="nutri-meal-slot">${MEAL_LBL[slot]}</div>
-        <div class="nutri-meal-name">${esc(r.name)}</div>
-        <div class="nutri-meal-vals">ca. ${r.kcal} kcal · ${r.protein} g Protein${r.cost?` · <span class="nutri-cost">${r.cost}</span>`:''}</div>
-      </button>
-    </div>`;
+    const r = rid && n.recipes[rid];
+    if (r){
+      const checked = !!done[slot];
+      h += `<div class="nutri-meal ${checked?'done':''}">
+        <button class="nutri-check ${checked?'on':''}" data-nutricheck="${i}:${slot}" aria-label="Abhaken">${checked?IC.check_sm:''}</button>
+        <button class="nutri-meal-body" data-reciperid="${rid}">
+          <div class="nutri-meal-slot">${MEAL_LBL[slot]}</div>
+          <div class="nutri-meal-name">${esc(r.name)}</div>
+          <div class="nutri-meal-vals">ca. ${r.kcal} kcal · ${r.protein} g Protein${r.cost?` · <span class="nutri-cost">${r.cost}</span>`:''}</div>
+        </button>
+        <button class="nutri-meal-x" data-mealclear="${i}:${slot}" aria-label="Mahlzeit entfernen">${IC.x}</button>
+      </div>`;
+    } else {
+      // Leerer Slot → Gericht zuweisen
+      h += `<button class="nutri-meal-empty" data-mealset="${i}:${slot}">
+        <span class="nutri-meal-empty-slot">${MEAL_LBL[slot]}</span>
+        <span class="nutri-meal-empty-add">${IC.plus} Gericht wählen</span>
+      </button>`;
+    }
   });
   h += `</div>`;
-  h += `<div class="nutri-sum">Gesamt: <b>ca. ${dayPlanKcal(n, plan)} kcal</b> · <b>${dayPlanProtein(n, plan)} g Protein</b></div>`;
+  if (hasAny) h += `<div class="nutri-sum">Gesamt: <b>ca. ${dayPlanKcal(n, plan)} kcal</b> · <b>${dayPlanProtein(n, plan)} g Protein</b></div>`;
+  // Eigenes Rezept anlegen
+  h += `<button class="nutri-newrecipe" data-newrecipe="1">${IC.plus} Eigenes Gericht anlegen</button>`;
   return h;
+}
+
+/* Gericht einer Mahlzeit zuweisen — wählt aus vorhandenen Rezepten oder legt neues an. */
+function openMealPicker(i, slot){
+  const n = getNutrition();
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  const recipeIds = Object.keys(n.recipes);
+  let list = '';
+  if (recipeIds.length){
+    recipeIds.forEach(rid => {
+      const r = n.recipes[rid];
+      list += `<button class="move-opt" data-pickmeal="${esc(rid)}">
+        <span style="flex:1;text-align:left">${esc(r.name)}<br><span style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono'">ca. ${r.kcal} kcal · ${r.protein} g P</span></span>
+      </button>`;
+    });
+  } else {
+    list = `<div class="link-empty">Noch keine Gerichte. Leg unten dein erstes an.</div>`;
+  }
+  ov.innerHTML = `<div class="sheet" id="sportSheetInner">
+    <div class="sheet-head"><div class="sheet-title">${MEAL_LBL[slot]} — Gericht wählen</div><button class="sheet-x" id="mealClose">${IC.x}</button></div>
+    <div class="sheet-body">
+      <div class="move-list">${list}</div>
+      <button class="nutri-newrecipe" id="mealNewRecipe" style="margin-top:14px">${IC.plus} Neues Gericht anlegen</button>
+    </div>
+  </div>`;
+  ov.onmousedown = e => { if (e.target === ov) ov.remove(); };
+  document.body.appendChild(ov);
+  $('mealClose').onclick = () => ov.remove();
+  ov.querySelectorAll('[data-pickmeal]').forEach(b => b.onclick = () => {
+    assignMeal(i, slot, b.dataset.pickmeal);
+    ov.remove(); render(); showToast('Hinzugefügt ✓');
+  });
+  $('mealNewRecipe').onclick = () => { ov.remove(); openRecipeCreate(i, slot); };
+}
+// Mahlzeit im Plan setzen (für den aktuell gewählten Tag/Option)
+function assignMeal(i, slot, rid){
+  const n = getNutrition();
+  if (!n.week[i]) n.week[i] = { a:{label:'Option A',meals:{}}, b:{label:'Option B',meals:{}} };
+  const dKey = dateKeyForWeekday(i);
+  const choice = n.chosen[dKey] || 'a';
+  if (!n.week[i][choice]) n.week[i][choice] = { label: choice==='a'?'Option A':'Option B', meals:{} };
+  if (!n.week[i][choice].meals) n.week[i][choice].meals = {};
+  n.week[i][choice].meals[slot] = rid;
+  pushUpsert(WORKOUT, false);
+}
+function clearMeal(i, slot){
+  const n = getNutrition();
+  const dKey = dateKeyForWeekday(i);
+  const choice = n.chosen[dKey] || 'a';
+  if (n.week[i] && n.week[i][choice] && n.week[i][choice].meals){
+    delete n.week[i][choice].meals[slot];
+    pushUpsert(WORKOUT, false);
+  }
+}
+/* Eigenes Gericht anlegen (Name, kcal, Protein, optional Kosten/Zutaten).
+   Wenn i/slot übergeben: gleich dieser Mahlzeit zuweisen. */
+function openRecipeCreate(i, slot){
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  ov.innerHTML = `<div class="sheet" id="sportSheetInner">
+    <div class="sheet-head"><div class="sheet-title">Eigenes Gericht</div><button class="sheet-x" id="recClose">${IC.x}</button></div>
+    <div class="sheet-body">
+      <div class="sec-lbl">Name</div>
+      <div class="field-card"><input class="cat-in-full" id="recName" placeholder="z. B. Magerquark mit Beeren"></div>
+      <div class="log-grid">
+        <div><div class="sec-lbl">Kalorien (kcal)</div><div class="field-card"><input class="cat-in-full" id="recKcal" type="number" inputmode="numeric" placeholder="z. B. 450"></div></div>
+        <div><div class="sec-lbl">Protein (g)</div><div class="field-card"><input class="cat-in-full" id="recProtein" type="number" inputmode="numeric" placeholder="z. B. 40"></div></div>
+      </div>
+      <div class="sec-lbl">Zutaten (optional, eine pro Zeile)</div>
+      <div class="field-card"><textarea class="cat-in-full" id="recIng" rows="3" placeholder="250 g Magerquark&#10;100 g Beeren&#10;30 g Haferflocken"></textarea></div>
+      <button class="sheet-save" id="recSave">Gericht speichern</button>
+    </div>
+  </div>`;
+  ov.onmousedown = e => { if (e.target === ov) ov.remove(); };
+  document.body.appendChild(ov);
+  enhanceNumberInputs(ov);
+  $('recClose').onclick = () => ov.remove();
+  $('recSave').onclick = () => {
+    const name = ($('recName').value||'').trim();
+    if (!name){ showToast('Bitte Namen eingeben'); return; }
+    const kcal = parseInt($('recKcal').value,10) || 0;
+    const protein = parseInt($('recProtein').value,10) || 0;
+    const ingRaw = ($('recIng').value||'').trim();
+    const ing = ingRaw ? ingRaw.split('\n').map(s=>s.trim()).filter(Boolean) : [];
+    const n = getNutrition();
+    const rid = 'r_'+uid();
+    n.recipes[rid] = { name, kcal, protein, ing, steps:[] };
+    if (i != null && slot){ assignMeal(i, slot, rid); }
+    else pushUpsert(WORKOUT, false);
+    ov.remove(); render(); showToast('Gericht gespeichert ✓');
+  };
 }
 
 /* ── Einkaufsliste für die Woche ──
@@ -2809,7 +3030,8 @@ function buildShoppingList(){
   const map = {};   // key = artikel+einheit → {menge, einheit, artikel, count}
   WD_CAL.forEach((wd, i) => {
     const choice = n.chosen[dateKeyForWeekday(i)] || 'a';
-    const plan = n.week[i][choice];
+    const day = n.week[i]; if (!day) return;
+    const plan = day[choice] || day.a; if (!plan || !plan.meals) return;
     Object.values(plan.meals).forEach(rid => {
       if (!rid || !n.recipes[rid]) return;
       (n.recipes[rid].ing || []).forEach(z => {
@@ -2890,6 +3112,9 @@ function renderSettings(){
     <div class="sec-lbl">Konto</div>
     <div class="field-card">
       <div class="set-account"><span class="set-email">${esc(USER?USER.email:'')}</span><span id="syncBadge" class="sync-badge"></span></div>
+      <div class="set-row" style="padding-top:0">
+        <button class="reset-btn" id="changePwBtn">${IC.key||IC.edit} Passwort ändern</button>
+      </div>
       <div class="set-row" style="padding-top:0">
         <button class="logout-btn" id="logoutBtn">Abmelden</button>
       </div>
@@ -3227,6 +3452,8 @@ function bindRoot(){
     const i = +dayClear.dataset.dayclear;
     if (confirm('Alle Übungen dieses Tages entfernen?')){ clearWorkoutDay(i); render(); }
   };
+  const dayEdit = document.querySelector('[data-dayedit]');
+  if (dayEdit) dayEdit.onclick = () => openDayEditSheet(+dayEdit.dataset.dayedit);
   document.querySelectorAll('[data-exlog]').forEach(b => b.onclick = () => {
     const [i,j] = b.dataset.exlog.split(':').map(Number);
     openLogSheet(i, j);
@@ -3266,8 +3493,8 @@ function bindRoot(){
     const n = getNutrition();
     const dKey = dateKeyForWeekday(+i);
     const choice = n.chosen[dKey] || 'a';
-    const plan = n.week[+i][choice];
-    const rid = plan.meals[slot];
+    const plan = (n.week[+i] && n.week[+i][choice]) || null;
+    const rid = plan && plan.meals ? plan.meals[slot] : null;
     const r = rid ? n.recipes[rid] : null;
     if (!n.proteinToday[dKey]) n.proteinToday[dKey] = { g:0, done:{} };
     const entry = n.proteinToday[dKey];
@@ -3281,6 +3508,15 @@ function bindRoot(){
     }
     pushUpsert(WORKOUT, false); render();
   });
+  // Mahlzeit zuweisen / entfernen / eigenes Gericht
+  document.querySelectorAll('[data-mealset]').forEach(b => b.onclick = () => {
+    const [i, slot] = b.dataset.mealset.split(':'); openMealPicker(+i, slot);
+  });
+  document.querySelectorAll('[data-mealclear]').forEach(b => b.onclick = () => {
+    const [i, slot] = b.dataset.mealclear.split(':'); clearMeal(+i, slot); render();
+  });
+  const newRec = document.querySelector('[data-newrecipe]');
+  if (newRec) newRec.onclick = () => openRecipeCreate();
   document.querySelectorAll('[data-reciperid]').forEach(b => b.onclick = () => openRecipeSheet(b.dataset.reciperid));
   const nGoal = document.querySelector('[data-nutrigoaledit]');
   if (nGoal) nGoal.onclick = () => openGoalSheet();
@@ -3528,6 +3764,8 @@ function bindRoot(){
   if (hi) hi.oninput = () => { setHeight(hi.value); };
   const lb = $('logoutBtn');
   if (lb) lb.onclick = doLogout;
+  const cpw = $('changePwBtn');
+  if (cpw) cpw.onclick = openPasswordSheet;
   const ta = $('trashAllBtn');
   if (ta) ta.onclick = () => {
     if (!TASKS.length) return;
