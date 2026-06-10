@@ -268,9 +268,11 @@ svg{width:18px;height:18px;display:block;}
 .iconbtn.del:hover{color:var(--p1);}
 .subs{margin:11px 0 2px 33px;display:flex;flex-direction:column;gap:7px;border-left:1px solid var(--line);padding-left:13px;}
 .sub{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--muted);}
-.sub .scbox{width:16px;height:16px;border-radius:5px;border:1.5px solid var(--faint);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.15s;}
+.sub .scbox{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--faint);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.15s;background:none;padding:0;-webkit-tap-highlight-color:transparent;}
 .sub .scbox.checked{background:var(--accent-dim);border-color:var(--accent-dim);}
-.sub.done span{text-decoration:line-through;opacity:.6;}
+.sub .scbox svg{width:12px;height:12px;}
+.sub .sub-text{cursor:pointer;flex:1;-webkit-tap-highlight-color:transparent;}
+.sub.done .sub-text{text-decoration:line-through;opacity:.6;}
 
 .empty{padding:50px 0;color:var(--faint);max-width:460px;}
 .empty .display{font-family:'Bricolage Grotesque';font-size:19px;color:var(--muted);margin-bottom:6px;}
@@ -1967,7 +1969,7 @@ function taskCardHTML(t){
   if (hasSubs && open){
     subs = '<div class="subs" data-stop="1">';
     t.subtasks.forEach(s => {
-      subs += `<div class="sub ${s.done?'done':''}"><span class="scbox ${s.done?'checked':''}" data-sub="${esc(t.id)}|${esc(s.id)}">${s.done?IC.check:''}</span><span>${esc(s.text)}</span></div>`;
+      subs += `<div class="sub ${s.done?'done':''}"><button type="button" class="scbox ${s.done?'checked':''}" data-sub="${esc(t.id)}|${esc(s.id)}" aria-label="Teilschritt erledigt">${s.done?IC.check:''}</button><span class="sub-text" data-sub="${esc(t.id)}|${esc(s.id)}">${esc(s.text)}</span></div>`;
     });
     subs += '</div>';
   }
