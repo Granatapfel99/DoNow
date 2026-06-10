@@ -419,6 +419,16 @@ svg{width:18px;height:18px;display:block;}
 .docfolder-name{font-size:15px;font-weight:600;color:var(--text);}
 .docfolder-meta{font-family:'JetBrains Mono';font-size:11.5px;color:var(--muted);}
 .docfolder-del{background:none;border:none;color:var(--faint);cursor:pointer;padding:6px;flex-shrink:0;transition:.13s;}
+.docfolder-move{background:none;border:none;color:var(--faint);cursor:pointer;padding:6px;flex-shrink:0;transition:.13s;}
+.docfolder-move svg{width:15px;height:15px;}
+.docfolder-move:hover{color:var(--accent);}
+.docs-breadcrumb{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:16px;font-size:13px;}
+.crumb{display:inline-flex;align-items:center;gap:5px;background:none;border:none;color:var(--muted);cursor:pointer;padding:4px 6px;border-radius:7px;font-size:13px;transition:.12s;}
+.crumb svg{width:14px;height:14px;}
+.crumb:hover{background:var(--card-hi);color:var(--text);}
+.crumb.current{color:var(--text);font-weight:600;padding:4px 6px;}
+.crumb-sep{color:var(--faint);display:inline-flex;}
+.crumb-sep svg{width:13px;height:13px;}
 .docfolder-del svg{width:16px;height:16px;}
 .docfolder-del:hover{color:var(--p1);}
 .doc-move{background:none;border:none;color:var(--faint);cursor:pointer;padding:6px;flex-shrink:0;transition:.13s;}
@@ -1240,6 +1250,7 @@ const IC = {
   gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
   sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/></svg>',
+  checkCircle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
   list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>',
   grid:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
   trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
@@ -2213,30 +2224,56 @@ function docExists(id){
   return !!(d && d.docPath);
 }
 // Ordner eines Bereichs
+// Ordner einer bestimmten Ebene (parentId null = oberste Ebene des Bereichs)
+function foldersInParent(areaId, parentId){
+  return NOTES.filter(n => {
+    if (n.areaId !== areaId || n.type !== 'docfolder') return false;
+    let pid = n.parentId || null;
+    if (pid && !rawFolderById(pid)) pid = null;   // verwaister Unterordner → oberste Ebene
+    return pid === (parentId || null);
+  }).sort((a,b)=>(a.title||'').localeCompare(b.title||''));
+}
+// Rückwärtskompatibel: alle Ordner eines Bereichs (für Verschiebe-Menü etc.)
 function foldersInAreaId(areaId){
   return NOTES.filter(n => n.areaId === areaId && n.type === 'docfolder').sort((a,b)=>(a.title||'').localeCompare(b.title||''));
 }
 // Dokumente in einem bestimmten Ordner (oder lose, wenn folderId null).
-// Schutz: Zeigt ein Dokument auf einen nicht mehr existierenden Ordner, gilt es als lose (Wurzel) —
-// so geht nie ein Dokument "verloren", selbst wenn sein Ordner mal verwaist ist.
+// Schutz: Zeigt ein Dokument auf einen nicht mehr existierenden Ordner, gilt es als lose (Wurzel).
 function docsInFolder(areaId, folderId){
   return NOTES.filter(n => {
     if (n.areaId !== areaId || n.type !== 'doc') return false;
     let fid = n.folderId || null;
-    if (fid && !folderById(fid)) fid = null;   // verwaist → Wurzel
+    if (fid && !rawFolderById(fid)) fid = null;   // verwaist → Wurzel
     return fid === (folderId || null);
   }).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
 }
-function folderById(id){ return NOTES.find(n => n.id === id && n.type === 'docfolder'); }
-function docFolderCreate(areaId, name){
+function rawFolderById(id){ return NOTES.find(n => n.id === id && n.type === 'docfolder'); }
+function folderById(id){ return rawFolderById(id); }
+// Pfad von der Wurzel bis zum Ordner (für Breadcrumb) — als Array von Ordner-Objekten
+function folderPath(folderId){
+  const path = [];
+  let cur = folderById(folderId);
+  let guard = 0;
+  while (cur && guard < 50){
+    path.unshift(cur);
+    cur = cur.parentId ? folderById(cur.parentId) : null;
+    guard++;
+  }
+  return path;
+}
+function docFolderCreate(areaId, name, parentId){
   name = (name||'').trim(); if (!name) return null;
-  const f = { _kind:'note', id:'folder-'+uid(), areaId, type:'docfolder', title:name, createdAt:Date.now(), updatedAt:Date.now() };
+  const f = { _kind:'note', id:'folder-'+uid(), areaId, type:'docfolder', title:name, parentId: parentId||null, createdAt:Date.now(), updatedAt:Date.now() };
   NOTES.unshift(f); pushUpsert(f, false); return f;
 }
 function docFolderDelete(id){
-  // Dokumente im Ordner wandern zurück in die Wurzel (nicht löschen!)
-  NOTES.forEach(n => { if (n.type==='doc' && n.folderId===id){ n.folderId = null; pushUpsert(n, false); } });
+  // Inhalt wandert eine Ebene hoch (zum Parent des gelöschten Ordners) — nichts geht verloren.
   const f = folderById(id);
+  const newParent = f ? (f.parentId || null) : null;
+  // Dokumente im Ordner hochziehen
+  NOTES.forEach(n => { if (n.type==='doc' && n.folderId===id){ n.folderId = newParent; pushUpsert(n, false); } });
+  // Direkte Unterordner hochziehen
+  NOTES.forEach(n => { if (n.type==='docfolder' && n.parentId===id){ n.parentId = newParent; pushUpsert(n, false); } });
   NOTES = NOTES.filter(n => n.id !== id);
   if (f) cloudDelete(f.id).catch(()=>{});
 }
@@ -2245,18 +2282,44 @@ function docMoveToFolder(docId, folderId){
   if (d){ d.folderId = folderId || null; pushUpsert(d, false); }
 }
 // Sheet zum Verschieben eines Dokuments in einen Ordner (oder in die Wurzel)
+// Alle Ordner eines Bereichs als eingerückte, hierarchische Liste (für Verschiebe-Menüs).
+// excludeId + dessen Unterbaum werden ausgelassen (Zirkelschutz beim Ordner-Verschieben).
+function folderTreeOptions(areaId, currentTargetId, excludeId){
+  const out = [];
+  const isExcluded = (fid) => {
+    // fid liegt im Unterbaum von excludeId?
+    let cur = folderById(fid);
+    let guard = 0;
+    while (cur && guard < 50){
+      if (cur.id === excludeId) return true;
+      cur = cur.parentId ? folderById(cur.parentId) : null;
+      guard++;
+    }
+    return false;
+  };
+  const walk = (parentId, depth) => {
+    foldersInParent(areaId, parentId).forEach(f => {
+      if (excludeId && isExcluded(f.id)) return;   // sich selbst + Unterbaum überspringen
+      out.push({ f, depth, on: currentTargetId === f.id });
+      walk(f.id, depth+1);
+    });
+  };
+  walk(null, 0);
+  return out;
+}
+
 function openMoveSheet(docId){
   const d = NOTES.find(n => n.id === docId && n.type === 'doc');
   if (!d) return;
-  const folders = foldersInAreaId(d.areaId);
+  const tree = folderTreeOptions(d.areaId, d.folderId || null, null);
   const ov = document.createElement('div');
   ov.className = 'overlay';
-  let opts = `<button class="move-opt ${!d.folderId?'on':''}" data-moveto="">${IC.paperclip} Keine (Übersicht)</button>`;
-  folders.forEach(f => {
-    opts += `<button class="move-opt ${d.folderId===f.id?'on':''}" data-moveto="${esc(f.id)}">${IC.folder} ${esc(f.title)}</button>`;
+  let opts = `<button class="move-opt ${!d.folderId?'on':''}" data-moveto="">${IC.paperclip} Oberste Ebene</button>`;
+  tree.forEach(({f, depth, on}) => {
+    opts += `<button class="move-opt ${on?'on':''}" data-moveto="${esc(f.id)}" style="padding-left:${14+depth*18}px">${IC.folder} ${esc(f.title)}</button>`;
   });
   ov.innerHTML = `<div class="sheet" id="sportSheetInner">
-    <div class="sheet-head"><div class="sheet-title">Verschieben nach…</div><button class="sheet-x" id="moveClose">${IC.x}</button></div>
+    <div class="sheet-head"><div class="sheet-title">Dokument verschieben nach…</div><button class="sheet-x" id="moveClose">${IC.x}</button></div>
     <div class="sheet-body"><div class="move-list">${opts}</div></div>
   </div>`;
   ov.onmousedown = e => { if (e.target === ov) ov.remove(); };
@@ -2265,6 +2328,31 @@ function openMoveSheet(docId){
   ov.querySelectorAll('[data-moveto]').forEach(b => b.onclick = () => {
     docMoveToFolder(docId, b.dataset.moveto || null);
     ov.remove(); render(); showToast('Verschoben ✓');
+  });
+}
+
+// Ordner in einen anderen Ordner (oder oberste Ebene) verschieben — mit Zirkelschutz.
+function openFolderMoveSheet(folderId){
+  const f = folderById(folderId);
+  if (!f) return;
+  const tree = folderTreeOptions(f.areaId, f.parentId || null, folderId);   // sich selbst ausschließen
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  let opts = `<button class="move-opt ${!f.parentId?'on':''}" data-folderto="">${IC.folder} Oberste Ebene</button>`;
+  tree.forEach(({f:tf, depth, on}) => {
+    opts += `<button class="move-opt ${on?'on':''}" data-folderto="${esc(tf.id)}" style="padding-left:${14+depth*18}px">${IC.folder} ${esc(tf.title)}</button>`;
+  });
+  ov.innerHTML = `<div class="sheet" id="sportSheetInner">
+    <div class="sheet-head"><div class="sheet-title">Ordner „${esc(f.title)}" verschieben nach…</div><button class="sheet-x" id="fmoveClose">${IC.x}</button></div>
+    <div class="sheet-body"><div class="move-list">${opts}</div></div>
+  </div>`;
+  ov.onmousedown = e => { if (e.target === ov) ov.remove(); };
+  document.body.appendChild(ov);
+  $('fmoveClose').onclick = () => ov.remove();
+  ov.querySelectorAll('[data-folderto]').forEach(b => b.onclick = () => {
+    f.parentId = b.dataset.folderto || null;
+    pushUpsert(f, false);
+    ov.remove(); render(); showToast('Ordner verschoben ✓');
   });
 }
 
@@ -2365,67 +2453,77 @@ function renderAreaNotes(area){
 }
 
 function renderAreaDocs(area){
-  // Ordner-Ansicht: in einem Ordner drin
+  // Aktuelle Ebene bestimmen (DOC_FOLDER = offener Ordner, null = oberste Ebene)
+  let current = null;
   if (DOC_FOLDER){
-    const folder = folderById(DOC_FOLDER);
-    if (!folder){ DOC_FOLDER = null; }
-    else return renderDocFolder(area, folder);
+    current = folderById(DOC_FOLDER);
+    if (!current){ DOC_FOLDER = null; }
   }
-  // Wurzel-Ansicht: Ordner + lose Dokumente
-  const folders = foldersInAreaId(area.id);
-  const looseDocs = docsInFolder(area.id, null);
-  let h = `<div class="docs-note">Wichtige Dokumente für „${esc(area.name)}" — Fahrzeugschein, Policen, Bescheide. In Ordnern sortierbar.</div>`;
+  const curId = current ? current.id : null;
+  const subFolders = foldersInParent(area.id, curId);
+  const docs = docsInFolder(area.id, curId);
+
+  let h = '';
+  // Breadcrumb-Pfad (nur wenn in einem Ordner)
+  if (current){
+    const path = folderPath(current.id);
+    h += `<div class="docs-breadcrumb">`;
+    h += `<button class="crumb" data-crumbgo="">${IC.folder} ${esc(area.name)}</button>`;
+    path.forEach((f, idx) => {
+      h += `<span class="crumb-sep">${IC.chevRight}</span>`;
+      if (idx === path.length-1){
+        h += `<span class="crumb current">${esc(f.title)}</span>`;
+      } else {
+        h += `<button class="crumb" data-crumbgo="${esc(f.id)}">${esc(f.title)}</button>`;
+      }
+    });
+    h += `</div>`;
+  } else {
+    h += `<div class="docs-note">Dokumente für „${esc(area.name)}" — in Ordnern und Unterordnern sortierbar.</div>`;
+  }
+
+  // Aktionen: Dokument hochladen + Ordner anlegen (in aktueller Ebene)
   h += `<div class="docs-actions">
-    <button class="docs-upload" data-docupload="${esc(area.id)}">${IC.paperclip} Dokument</button>
-    <button class="docs-newfolder" data-newfolder="${esc(area.id)}">${IC.folder||IC.layers} Ordner</button>
+    <button class="docs-upload" data-docupload="${esc(area.id)}"${curId?` data-intofolder="${esc(curId)}"`:''}>${IC.paperclip} Dokument</button>
+    <button class="docs-newfolder" data-newfolder="${esc(area.id)}"${curId?` data-newparent="${esc(curId)}"`:''}>${IC.folder} ${curId?'Unterordner':'Ordner'}</button>
   </div>`;
   h += `<input type="file" id="docFileInput" accept="image/*,application/pdf" style="display:none">`;
-  // Ordner
-  if (folders.length){
+
+  // Unterordner
+  if (subFolders.length){
     h += `<div class="docs-folders">`;
-    folders.forEach(f => {
-      const cnt = docsInFolder(area.id, f.id).length;
+    subFolders.forEach(f => {
+      const dCnt = docsInFolder(area.id, f.id).length;
+      const sCnt = foldersInParent(area.id, f.id).length;
+      const parts = [];
+      if (sCnt) parts.push(`${sCnt} ${sCnt===1?'Ordner':'Ordner'}`);
+      parts.push(`${dCnt} ${dCnt===1?'Dokument':'Dokumente'}`);
       h += `<div class="docfolder-card" data-folderopen="${esc(f.id)}">
-        <span class="docfolder-ic">${IC.folder||IC.layers}</span>
-        <span class="docfolder-info"><span class="docfolder-name">${esc(f.title)}</span><span class="docfolder-meta">${cnt} ${cnt===1?'Dokument':'Dokumente'}</span></span>
+        <span class="docfolder-ic">${IC.folder}</span>
+        <span class="docfolder-info"><span class="docfolder-name">${esc(f.title)}</span><span class="docfolder-meta">${parts.join(' · ')}</span></span>
+        <button class="docfolder-move" data-foldermove="${esc(f.id)}" aria-label="Ordner verschieben">${IC.folder}</button>
         <button class="docfolder-del" data-folderdel="${esc(f.id)}" aria-label="Ordner löschen">${IC.trash2}</button>
       </div>`;
     });
     h += `</div>`;
   }
-  // Lose Dokumente (ohne Ordner)
-  if (looseDocs.length){
-    h += `<div class="docs-list">`;
-    looseDocs.forEach(d => h += docCardHtml(d, area));
-    h += `</div>`;
-  }
-  if (!folders.length && !looseDocs.length){
-    h += `<div class="docs-placeholder">${IC.paperclip}<span>Noch keine Dokumente oder Ordner</span></div>`;
-  }
-  return h;
-}
-// Ansicht innerhalb eines Ordners
-function renderDocFolder(area, folder){
-  const docs = docsInFolder(area.id, folder.id);
-  let h = `<button class="fokus-back" data-docfolderback="1">${IC.chevLeft} Alle Dokumente</button>`;
-  h += `<div class="notes-area-head"><div class="notes-area-title">${IC.folder||''} ${esc(folder.title)}</div></div>`;
-  h += `<button class="docs-upload" data-docupload="${esc(area.id)}" data-intofolder="${esc(folder.id)}">${IC.paperclip} Dokument in diesen Ordner</button>`;
-  h += `<input type="file" id="docFileInput" accept="image/*,application/pdf" style="display:none">`;
+  // Dokumente dieser Ebene
   if (docs.length){
     h += `<div class="docs-list">`;
     docs.forEach(d => h += docCardHtml(d, area));
     h += `</div>`;
-  } else {
-    h += `<div class="docs-placeholder">${IC.paperclip}<span>Ordner ist leer</span></div>`;
+  }
+  if (!subFolders.length && !docs.length){
+    h += `<div class="docs-placeholder">${IC.paperclip}<span>${current?'Ordner ist leer':'Noch keine Dokumente oder Ordner'}</span></div>`;
   }
   return h;
 }
-// Einzelne Dokumentenkarte (wiederverwendet in Wurzel + Ordner)
+// Einzelne Dokumentenkarte (wiederverwendet auf jeder Ebene)
 function docCardHtml(d, area){
   const isImg = d.docType && d.docType.startsWith('image/');
   const folders = foldersInAreaId(area.id);
-  // Verschiebe-Menü nur anbieten, wenn es Ordner gibt
-  const moveBtn = folders.length ? `<button class="doc-move" data-docmove="${esc(d.id)}" aria-label="Verschieben">${IC.folder||IC.layers}</button>` : '';
+  // Verschiebe-Menü nur anbieten, wenn es überhaupt Ordner gibt
+  const moveBtn = folders.length ? `<button class="doc-move" data-docmove="${esc(d.id)}" aria-label="Verschieben">${IC.folder}</button>` : '';
   return `<div class="doc-card">
     <button class="doc-open" data-docopen="${esc(d.id)}">
       <span class="doc-icon">${isImg?IC.image:IC.paperclip}</span>
@@ -3260,7 +3358,7 @@ function renderSettings(){
 
 // Zentrale Navigations-Definition (Reihenfolge = Anzeige). To-Dos immer zuerst.
 const NAV = [
-  { id:'overview', label:'To-Do\'s',      icon:'sun'      },
+  { id:'overview', label:'To-Do\'s',      icon:'checkCircle' },
   { id:'bereiche', label:'Bereiche',      icon:'bullseye' },
   { id:'links',    label:'Links',         icon:'link'     },
   { id:'trash',    label:'Papierkorb',    icon:'trash'    },
@@ -3705,23 +3803,34 @@ function bindRoot(){
   // Ordner: anlegen, öffnen, zurück, löschen
   const newFolder = document.querySelector('[data-newfolder]');
   if (newFolder) newFolder.onclick = () => {
-    const name = prompt('Name des Ordners (z. B. Versicherung, Steuer 2025):');
-    if (name && name.trim()){ docFolderCreate(newFolder.dataset.newfolder, name); render(); }
+    const parentId = newFolder.dataset.newparent || null;
+    const name = prompt(parentId ? 'Name des Unterordners:' : 'Name des Ordners (z. B. Versicherung, Steuer 2025):');
+    if (name && name.trim()){ docFolderCreate(newFolder.dataset.newfolder, name, parentId); render(); }
   };
   document.querySelectorAll('[data-folderopen]').forEach(b => b.onclick = e => {
-    if (e.target.closest('[data-folderdel]')) return;
+    if (e.target.closest('[data-folderdel]') || e.target.closest('[data-foldermove]')) return;
     DOC_FOLDER = b.dataset.folderopen; render(); window.scrollTo(0,0);
   });
-  const folderBack = document.querySelector('[data-docfolderback]');
-  if (folderBack) folderBack.onclick = () => { DOC_FOLDER = null; render(); window.scrollTo(0,0); };
+  // Breadcrumb-Navigation (leerer Wert = oberste Ebene)
+  document.querySelectorAll('[data-crumbgo]').forEach(b => b.onclick = () => {
+    DOC_FOLDER = b.dataset.crumbgo || null; render(); window.scrollTo(0,0);
+  });
   document.querySelectorAll('[data-folderdel]').forEach(b => b.onclick = e => {
     e.stopPropagation();
     const f = folderById(b.dataset.folderdel);
-    const cnt = f ? docsInFolder(f.areaId, f.id).length : 0;
-    if (confirm(`Ordner „${f?f.title:''}" löschen?${cnt?` Die ${cnt} Dokumente wandern zurück in die Übersicht (werden nicht gelöscht).`:''}`)){
-      docFolderDelete(b.dataset.folderdel); render();
+    const dCnt = f ? docsInFolder(f.areaId, f.id).length : 0;
+    const sCnt = f ? foldersInParent(f.areaId, f.id).length : 0;
+    let msg = `Ordner „${f?f.title:''}" löschen?`;
+    if (dCnt || sCnt){
+      const bits = [];
+      if (dCnt) bits.push(`${dCnt} ${dCnt===1?'Dokument':'Dokumente'}`);
+      if (sCnt) bits.push(`${sCnt} ${sCnt===1?'Unterordner':'Unterordner'}`);
+      msg += ` ${bits.join(' und ')} wandern eine Ebene höher (werden nicht gelöscht).`;
     }
+    if (confirm(msg)){ docFolderDelete(b.dataset.folderdel); render(); }
   });
+  // Ordner in anderen Ordner verschieben
+  document.querySelectorAll('[data-foldermove]').forEach(b => b.onclick = e => { e.stopPropagation(); openFolderMoveSheet(b.dataset.foldermove); });
   // Dokument in Ordner verschieben
   document.querySelectorAll('[data-docmove]').forEach(b => b.onclick = () => openMoveSheet(b.dataset.docmove));
   // Notiz-Detail: Titel + Body live speichern
@@ -3848,11 +3957,15 @@ function bindRoot(){
 
   // Karten-Interaktionen
   document.querySelectorAll('[data-toggle]').forEach(b => b.onclick = e => { e.stopPropagation(); toggleDone(b.dataset.toggle); });
-  document.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => { const t = [...TASKS,...TRASH].find(x => x.id===b.dataset.edit); if (t) openSheet({...t}); });
+  document.querySelectorAll('[data-edit]').forEach(b => b.onclick = e => {
+    // Nicht öffnen, wenn der Klick aus einem interaktiven Kind kam (Teilschritt, Stop-Bereich)
+    if (e.target.closest('[data-sub]') || e.target.closest('[data-stop]')) return;
+    const t = [...TASKS,...TRASH].find(x => x.id===b.dataset.edit); if (t) openSheet({...t});
+  });
   document.querySelectorAll('[data-del]').forEach(b => b.onclick = e => { e.stopPropagation(); removeTask(b.dataset.del); });
   document.querySelectorAll('[data-subtoggle]').forEach(b => b.onclick = e => { e.stopPropagation(); const id=b.dataset.subtoggle; openSubsState[id]=!openSubsState[id]; render(); });
   document.querySelectorAll('[data-more]').forEach(b => b.onclick = e => { e.stopPropagation(); openTaskMenu(b, b.dataset.more); });
-  document.querySelectorAll('[data-sub]').forEach(b => b.onclick = e => { e.stopPropagation(); const [id,sid]=b.dataset.sub.split('|'); toggleSub(id,sid); });
+  document.querySelectorAll('[data-sub]').forEach(b => b.onclick = e => { e.stopPropagation(); e.preventDefault(); const [id,sid]=b.dataset.sub.split('|'); toggleSub(id,sid); });
   document.querySelectorAll('[data-stop]').forEach(el => el.onclick = e => e.stopPropagation());
 
   // Papierkorb
