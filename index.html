@@ -5090,10 +5090,16 @@ function bindSheet(){
   document.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => { DRAFT.category = b.dataset.cat; renderSheet(); });
 
   // Teilschritte
-  document.querySelectorAll('[data-subcheck]').forEach(b => b.onclick = () => {
-    const i = +b.dataset.subcheck;
-    DRAFT.subtasks[i].done = !DRAFT.subtasks[i].done;
-    renderSheet();
+  // Teilschritte: Checkbox umschalten. mousedown-preventDefault verhindert,
+  // dass ein fokussiertes Input-Feld den Klick auf dem Desktop verschluckt.
+  document.querySelectorAll('[data-subcheck]').forEach(b => {
+    b.onmousedown = e => e.preventDefault();   // Fokus bleibt, Klick geht durch
+    b.onclick = e => {
+      e.preventDefault(); e.stopPropagation();
+      const i = +b.dataset.subcheck;
+      DRAFT.subtasks[i].done = !DRAFT.subtasks[i].done;
+      renderSheet();
+    };
   });
   document.querySelectorAll('[data-subinput]').forEach(inp => inp.oninput = () => { DRAFT.subtasks[+inp.dataset.subinput].text = inp.value; });
   document.querySelectorAll('[data-subdel]').forEach(b => b.onclick = () => { DRAFT.subtasks.splice(+b.dataset.subdel,1); renderSheet(); });
