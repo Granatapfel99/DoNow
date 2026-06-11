@@ -3709,6 +3709,10 @@ function renderSettings(){
     <div class="field-card">
       <div class="set-row"><button class="reset-btn" id="openTrashBtn">${IC.trash}Papierkorb öffnen${TRASH.length?` (${TRASH.length})`:''}</button></div>
       <div class="set-row"><button class="reset-btn" id="trashAllBtn">${IC.trash}Alle in den Papierkorb</button></div>
+      <div class="set-row" style="flex-direction:column;align-items:stretch;gap:6px">
+        <button class="reset-btn" id="updateBtn">${IC.repeat} Nach Updates suchen</button>
+        <span class="set-hint">Lädt die neueste Version. Nützlich, wenn Änderungen auf dem Handy nicht erscheinen.</span>
+      </div>
     </div>
     <div class="sec-lbl" style="color:var(--p1);margin-top:24px">Gefahrenzone</div>
     <div class="field-card">
@@ -4420,6 +4424,18 @@ function bindRoot(){
   const cpw = $('changePwBtn');
   if (cpw) cpw.onclick = openPasswordSheet;
   document.querySelectorAll('[data-settheme]').forEach(b => b.onclick = () => { setTheme(b.dataset.settheme); render(); });
+  const upd = $('updateBtn');
+  if (upd) upd.onclick = async () => {
+    showToast('Suche nach Updates…');
+    try {
+      // Alle Caches löschen
+      if (window.caches){ const keys = await caches.keys(); await Promise.all(keys.map(k => caches.delete(k))); }
+      // Service Worker abmelden, damit die alte Version nicht weiter ausgeliefert wird
+      if (navigator.serviceWorker){ const regs = await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r => r.unregister())); }
+    } catch(e){ console.warn('Update-Cleanup:', e.message); }
+    // Hart neu laden (Cache umgehen)
+    location.reload(true);
+  };
   const fr = $('factoryResetBtn');
   if (fr) fr.onclick = openFactoryResetSheet;
   const ta = $('trashAllBtn');
