@@ -354,6 +354,7 @@ svg{width:18px;height:18px;display:block;}
 .notes-addarea svg{width:16px;height:16px;}
 .notes-addarea:hover{border-color:var(--accent-dim);color:var(--text);}
 .notes-area-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.notes-area-head-l{display:flex;align-items:center;gap:12px;min-width:0;}
 .notes-area-title{font-family:'Bricolage Grotesque';font-weight:800;font-size:24px;letter-spacing:-.5px;}
 .notes-area-del{background:none;border:none;color:var(--faint);cursor:pointer;padding:4px;transition:.13s;}
 .notes-area-del svg{width:18px;height:18px;}
@@ -382,7 +383,12 @@ svg{width:18px;height:18px;display:block;}
 .inline-link::before{content:"\2197";display:inline-block;font-size:.85em;margin-right:1px;opacity:.7;text-decoration:none;}
 .inline-link:hover{opacity:.8;}
 .note-check-list{display:flex;flex-direction:column;gap:8px;}
-.note-check-row{display:flex;align-items:center;gap:10px;}
+.note-check-row{display:flex;align-items:center;gap:8px;}
+.note-check-row.lvl1{margin-left:30px;}
+.note-check-indent{background:none;border:none;color:var(--faint);cursor:pointer;padding:4px;flex-shrink:0;display:flex;opacity:.5;transition:.13s;}
+.note-check-indent svg{width:14px;height:14px;}
+.note-check-indent:hover{opacity:1;color:var(--text);}
+.note-check-row.lvl1 .note-check-box{width:21px;height:21px;}
 .note-check-box{width:24px;height:24px;border-radius:7px;border:1.8px solid var(--line);background:none;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;transition:.13s;}
 .note-check-box.on{background:var(--on);border-color:var(--on);}
 .note-check-box svg{width:14px;height:14px;}
@@ -819,6 +825,34 @@ body.dnd-active .sport-ex{user-select:none;-webkit-user-select:none;}
 .sub-edit.done input{text-decoration:line-through;opacity:.55;}
 .sub-edit input{flex:1;background:none;border:none;color:var(--text);font-size:14px;outline:none;}
 .sub-add{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px;background:none;border:none;cursor:pointer;padding:11px 0;width:100%;}
+.chip.attach{color:var(--p3);}
+.chip.attach svg{width:12px;height:12px;}
+.attach-hint{font-size:13px;color:var(--faint);padding:10px 0;}
+.attach-add{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--card-hi);border:1px solid var(--line);color:var(--text);border-radius:11px;padding:13px;font-size:14px;cursor:pointer;transition:.13s;}
+.attach-add svg{width:16px;height:16px;}
+.attach-add:hover{border-color:var(--accent-dim);}
+.attach-card{display:flex;align-items:center;gap:12px;background:var(--card-hi);border:1px solid var(--line);border-radius:11px;padding:12px;}
+.attach-open{flex:1;display:flex;align-items:center;gap:11px;background:none;border:none;cursor:pointer;text-align:left;min-width:0;}
+.attach-ic{color:var(--p3);flex-shrink:0;display:flex;}
+.attach-ic svg{width:20px;height:20px;}
+.attach-info{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.attach-name{color:var(--text);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.attach-meta{color:var(--faint);font-size:12px;font-family:'JetBrains Mono';}
+.attach-del{background:none;border:none;color:var(--faint);cursor:pointer;padding:7px;flex-shrink:0;transition:.13s;}
+.attach-del svg{width:16px;height:16px;}
+.attach-del:hover{color:var(--p1);}
+.storage-top{display:flex;justify-content:space-between;font-size:13.5px;color:var(--muted);margin-bottom:9px;}
+.storage-val{font-family:'JetBrains Mono';color:var(--text);}
+.storage-bar{height:8px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;}
+.storage-fill{height:100%;border-radius:99px;transition:width .3s;}
+.area-icon-btn{background:var(--card-hi);border:1px solid var(--line);border-radius:11px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--accent);cursor:pointer;flex-shrink:0;transition:.13s;}
+.area-icon-btn svg{width:22px;height:22px;}
+.area-icon-btn:hover{border-color:var(--accent-dim);transform:scale(1.04);}
+.icon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(56px,1fr));gap:10px;}
+.iconpick{aspect-ratio:1;background:var(--card-hi);border:1px solid var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;transition:.13s;}
+.iconpick svg{width:24px;height:24px;}
+.iconpick:hover{border-color:var(--accent-dim);color:var(--text);transform:translateY(-2px);}
+.iconpick.on{background:var(--accent);color:#10100c;border-color:var(--accent);}
 .sub-add:hover{color:var(--accent);}
 .del-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:rgba(255,93,77,.08);border:1px solid rgba(255,93,77,.25);color:var(--p1);border-radius:11px;padding:13px;font-size:14px;cursor:pointer;margin-top:22px;transition:.15s;}
 .del-btn:hover{background:rgba(255,93,77,.15);}
@@ -1302,6 +1336,24 @@ const IC = {
   folder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>',
   key:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3"/></svg>',
   copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>',
+  indent:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 8 7 12 3 16"/><line x1="21" y1="12" x2="11" y2="12"/><line x1="21" y1="6" x2="11" y2="6"/><line x1="21" y1="18" x2="11" y2="18"/></svg>',
+  outdent:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 3 12 7 16"/><line x1="21" y1="12" x2="11" y2="12"/><line x1="21" y1="6" x2="11" y2="6"/><line x1="21" y1="18" x2="11" y2="18"/></svg>',
+  ar_car:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>',
+  ar_home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+  ar_money:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+  ar_book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
+  ar_heart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>',
+  ar_plane:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>',
+  ar_briefcase:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>',
+  ar_cart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>',
+  ar_health:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+  ar_doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+  ar_star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+  ar_code:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+  ar_music:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+  ar_camera:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+  ar_pet:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="4" cy="8" r="2"/><circle cx="6.5" cy="14.5" r="2"/><circle cx="15.5" cy="14.5" r="2"/><path d="M8 18a4 4 0 0 0 8 0c0-1.5-1-2.5-2-3.5"/></svg>',
+  ar_tool:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
   more:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>',
   activity:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
   grip:'<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
@@ -1680,7 +1732,9 @@ function openFactoryResetSheet(){
       // 2. Alle Storage-Dateien des Nutzers entfernen
       try {
         const allDocs = NOTES.filter(n => n.type === 'doc' && n.docPath).map(n => n.docPath);
-        if (allDocs.length) await sb.storage.from(DOC_BUCKET).remove(allDocs);
+        const allAttach = [...TASKS, ...TRASH].filter(t => t.attach && t.attach.path).map(t => t.attach.path);
+        const allFiles = [...allDocs, ...allAttach];
+        if (allFiles.length) await sb.storage.from(DOC_BUCKET).remove(allFiles);
       } catch(e){ console.warn('Storage-Cleanup:', e.message); }
       // 3. Alle Datenbank-Zeilen des Nutzers löschen (RLS schützt: nur eigene)
       const { error: delErr } = await sb.from('tasks').delete().eq('user_id', USER.id);
@@ -1854,12 +1908,18 @@ function restoreTask(id){
 
 function purgeTask(id){
   const idx = TRASH.findIndex(x => x.id === id); if (idx < 0) return;
+  const t = TRASH[idx];
+  // Anhang endgültig aus dem Speicher entfernen
+  if (t.attach && t.attach.path && sb){ sb.storage.from(DOC_BUCKET).remove([t.attach.path]).catch(()=>{}); }
   TRASH.splice(idx, 1); render(); pushDelete(id);
 }
 
 function emptyTrash(){
   if (!TRASH.length) return;
   const old = TRASH.slice();
+  // Alle Anhänge der gelöschten Aufgaben aus dem Speicher entfernen
+  const paths = old.filter(t => t.attach && t.attach.path).map(t => t.attach.path);
+  if (paths.length && sb){ sb.storage.from(DOC_BUCKET).remove(paths).catch(()=>{}); }
   TRASH = []; render();
   old.forEach(t => pushDelete(t.id));
   showToast(`Papierkorb geleert (${old.length})`);
@@ -2003,7 +2063,7 @@ function taskCardHTML(t){
 
   let meta = '';
   const subDone = hasSubs ? t.subtasks.filter(s => s.done).length : 0;
-  if (t.category || di || t.priority>0 || hasRepeat(t.repeat) || st || t.effort || hasSubs){
+  if (t.category || di || t.priority>0 || hasRepeat(t.repeat) || st || t.effort || hasSubs || (t.attach&&t.attach.path)){
     meta = '<div class="t-meta">';
     if (t.priority>0) meta += `<span class="pflag" style="color:${p.c}">${flagFill(p.c)}${p.t}</span>`;
     if (st) meta += `<span class="chip status"><span class="st-dot" style="background:${st.c}"></span><span style="color:${st.c}">${st.lbl}</span></span>`;
@@ -2011,6 +2071,7 @@ function taskCardHTML(t){
     if (t.effort) meta += `<span class="chip effort">${IC.clock}${EFFORT_LBL[t.effort]||t.effort}</span>`;
     if (hasRepeat(t.repeat)) meta += `<span class="chip rep">${IC.repeat}${repeatLabel(t.repeat)}</span>`;
     if (hasSubs) meta += `<span class="chip subs ${subDone===t.subtasks.length?'allDone':''}"><span class="subs-mini"><span class="subs-mini-fill" style="width:${Math.round(subDone/t.subtasks.length*100)}%"></span></span>${subDone}/${t.subtasks.length}</span>`;
+    if (t.attach && t.attach.path) meta += `<span class="chip attach">${IC.paperclip}Anhang</span>`;
     if (t.category) meta += `<span class="chip cat">#${esc(t.category)}</span>`;
     meta += '</div>';
   }
@@ -2454,7 +2515,11 @@ function renderBereiche(){
 
 function renderAreaDetail(area){
   let h = `<button class="fokus-back" data-areaback="1">${IC.chevLeft} Alle Bereiche</button>`;
-  h += `<div class="notes-area-head"><div class="notes-area-title">${esc(area.name)}</div>`;
+  h += `<div class="notes-area-head">
+    <div class="notes-area-head-l">
+      <button class="area-icon-btn" data-areaicon="${esc(area.id)}" aria-label="Icon ändern" title="Icon ändern">${IC[area.icon]||IC.note}</button>
+      <div class="notes-area-title">${esc(area.name)}</div>
+    </div>`;
   // Sport-Bereich nicht löschbar (Kern-Feature), andere schon
   if (area.id !== SPORT_AREA_ID){
     h += `<button class="notes-area-del" data-areadel="${esc(area.id)}" aria-label="Bereich löschen">${IC.trash2}</button>`;
@@ -2596,7 +2661,9 @@ function renderNoteDetail(note){
   if (note.type === 'checklist'){
     h += `<div class="note-check-list" id="noteCheckList">`;
     (note.items||[]).forEach((it, idx) => {
-      h += `<div class="note-check-row" data-noteitemidx="${idx}">
+      const lvl = it.level||0;
+      h += `<div class="note-check-row lvl${lvl}" data-noteitemidx="${idx}">
+        <button class="note-check-indent" data-noteindent="${idx}" aria-label="Ebene wechseln" title="${lvl?'Ausrücken':'Einrücken'}">${lvl?IC.outdent:IC.indent}</button>
         <button class="note-check-box ${it.done?'on':''}" data-notetoggle="${idx}" aria-label="Abhaken">${it.done?IC.check_sm:''}</button>
         <input class="note-check-text ${it.done?'done':''}" data-noteitemtext="${idx}" value="${esc(it.text||'')}" placeholder="Eintrag…">
         <button class="note-check-del" data-noteitemdel="${idx}" aria-label="Löschen">${IC.x}</button>
@@ -2713,9 +2780,32 @@ function areaAdd(name){
   name = (name||'').trim();
   if (!name) return;
   if (AREAS.some(a => a.name.toLowerCase() === name.toLowerCase())){ showToast('Bereich existiert schon'); return; }
-  const obj = { _kind:'area', id:'area-'+uid(), name, icon:'note', hasTools:false, createdAt:Date.now() };
+  const obj = { _kind:'area', id:'area-'+uid(), name, icon:'ar_star', hasTools:false, createdAt:Date.now() };
   AREAS.push(obj);
   pushUpsert(obj, false);
+  return obj;
+}
+// Auswählbare Bereich-Icons (Schlüssel müssen in IC existieren)
+const AREA_ICONS = ['ar_star','ar_briefcase','ar_book','ar_code','ar_money','ar_cart','ar_home','ar_car','ar_plane','ar_heart','ar_health','ar_camera','ar_music','ar_pet','ar_tool','ar_doc','dumbbell','note'];
+function openAreaIconSheet(areaId){
+  const area = areaById(areaId); if (!area) return;
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  let grid = AREA_ICONS.map(key =>
+    `<button class="iconpick ${area.icon===key?'on':''}" data-pickicon="${key}">${IC[key]||IC.note}</button>`
+  ).join('');
+  ov.innerHTML = `<div class="sheet" id="sportSheetInner">
+    <div class="sheet-head"><div class="sheet-title">Icon wählen</div><button class="sheet-x" id="iconClose">${IC.x}</button></div>
+    <div class="sheet-body"><div class="icon-grid">${grid}</div></div>
+  </div>`;
+  ov.onmousedown = e => { if (e.target === ov) ov.remove(); };
+  document.body.appendChild(ov);
+  $('iconClose').onclick = () => ov.remove();
+  ov.querySelectorAll('[data-pickicon]').forEach(b => b.onclick = () => {
+    area.icon = b.dataset.pickicon;
+    pushUpsert(area, false);
+    ov.remove(); render(); showToast('Icon geändert ✓');
+  });
 }
 function areaDelete(id){
   if (id === SPORT_AREA_ID) return;  // Sport ist fest
@@ -2755,6 +2845,47 @@ function noteDelete(id){
    Bucket "documents" muss in Supabase existieren (öffentlich lesbar).
    Datei wird hochgeladen, öffentliche URL geholt, als note (type:doc) gespeichert. */
 const DOC_BUCKET = 'documents';
+
+/* Verkleinert ein Bild VOR dem Upload — der zentrale Speicher-Schutz.
+   Skaliert auf max. 1400px Kantenlänge runter und speichert als JPG (Qualität 0.72).
+   Aus einem 4-MB-Handyfoto werden so ~0,4 MB. PDFs/andere Dateien bleiben unberührt.
+   Gibt eine Blob/File zurück (oder die Originaldatei, falls keine Komprimierung möglich). */
+async function compressImage(file){
+  // Nur echte Bilder komprimieren; keine PDFs, GIFs (Animation würde zerstört) etc.
+  if (!file.type.startsWith('image/') || file.type === 'image/gif') return file;
+  try {
+    const dataUrl = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+    const img = await new Promise((res, rej) => {
+      const i = new Image();
+      i.onload = () => res(i);
+      i.onerror = rej;
+      i.src = dataUrl;
+    });
+    const MAX = 1400;
+    let { width, height } = img;
+    if (width <= MAX && height <= MAX && file.size < 600*1024) return file; // schon klein genug
+    if (width > height && width > MAX){ height = Math.round(height * MAX / width); width = MAX; }
+    else if (height > MAX){ width = Math.round(width * MAX / height); height = MAX; }
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, width, height);
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.72));
+    if (!blob || blob.size >= file.size) return file; // Komprimierung brachte nichts → Original
+    // Dateinamen auf .jpg anpassen
+    const baseName = (file.name||'foto').replace(/\.[^.]+$/, '') + '.jpg';
+    return new File([blob], baseName, { type:'image/jpeg' });
+  } catch(e){
+    console.warn('Komprimierung fehlgeschlagen, nutze Original:', e.message);
+    return file;
+  }
+}
+
 async function uploadDoc(areaId, file, folderId){
   // Größe begrenzen (10 MB), sonst sprengt es Gratis-Speicher schnell
   if (file.size > 10*1024*1024){ showToast('Datei zu groß (max. 10 MB)'); return; }
@@ -2789,6 +2920,53 @@ function docDelete(id){
   // Datei aus Storage entfernen
   if (doc && doc.docPath && sb){
     sb.storage.from(DOC_BUCKET).remove([doc.docPath]).catch(()=>{});
+  }
+}
+
+/* ── Anhang an eine Aufgabe/Erinnerung ──
+   Speichert genau EINEN Anhang pro Aufgabe als t.attach = {path,type,size,name}.
+   Bilder werden vorher verkleinert (Speicher-Schutz). */
+async function uploadTaskAttachment(taskId, file){
+  if (!sb || !USER){ showToast('Keine Verbindung'); return; }
+  if (file.size > 10*1024*1024){ showToast('Datei zu groß (max. 10 MB)'); return; }
+  const t = [...TASKS, ...TRASH].find(x => x.id === taskId); if (!t) return;
+  showToast('Lade hoch…');
+  try {
+    const compressed = await compressImage(file);
+    const ext = (compressed.name.split('.').pop()||'dat').toLowerCase();
+    const path = `${USER.id}/tasks/${taskId}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+    const { error: upErr } = await sb.storage.from(DOC_BUCKET).upload(path, compressed, { upsert:false, contentType:compressed.type });
+    if (upErr) throw upErr;
+    // Alten Anhang (falls vorhanden) aus dem Speicher entfernen — nur 1 Anhang pro Aufgabe
+    if (t.attach && t.attach.path){ sb.storage.from(DOC_BUCKET).remove([t.attach.path]).catch(()=>{}); }
+    t.attach = { path, type: compressed.type, size: compressed.size, name: file.name };
+    pushUpsert(t, false);
+    render();
+    showToast('Angehängt ✓');
+  } catch(e){
+    console.warn('Anhang-Upload-Fehler:', e.message);
+    showToast('Upload fehlgeschlagen — ist der Bucket eingerichtet?');
+  }
+}
+function removeTaskAttachment(taskId){
+  const t = [...TASKS, ...TRASH].find(x => x.id === taskId); if (!t || !t.attach) return;
+  if (t.attach.path && sb){ sb.storage.from(DOC_BUCKET).remove([t.attach.path]).catch(()=>{}); }
+  t.attach = null;
+  pushUpsert(t, false);
+  render();
+  showToast('Anhang entfernt');
+}
+async function openTaskAttachment(taskId){
+  const t = [...TASKS, ...TRASH].find(x => x.id === taskId);
+  if (!t || !t.attach || !t.attach.path || !sb){ showToast('Anhang nicht gefunden'); return; }
+  showToast('Öffne…');
+  try {
+    const { data, error } = await sb.storage.from(DOC_BUCKET).createSignedUrl(t.attach.path, 3600);
+    if (error) throw error;
+    window.open(data.signedUrl, '_blank', 'noopener');
+  } catch(e){
+    console.warn('Öffnen-Fehler:', e.message);
+    showToast('Konnte nicht öffnen');
   }
 }
 
@@ -3373,6 +3551,16 @@ function openShoppingSheet(){
   $('sportClose').onclick = closeSportSheet;
 }
 
+/* Belegten Datei-Speicher schätzen — aus den bekannten Dateigrößen (Bereich-Dokumente
+   + Aufgaben-Anhänge). Free Tier hat 1 GB Datei-Speicher. */
+function storageUsage(){
+  let bytes = 0;
+  NOTES.forEach(n => { if (n.type === 'doc' && n.size) bytes += n.size; });
+  [...TASKS, ...TRASH].forEach(t => { if (t.attach && t.attach.size) bytes += t.attach.size; });
+  const limit = 1024 * 1024 * 1024; // 1 GB
+  return { bytes, limit, pct: Math.min(100, bytes / limit * 100) };
+}
+
 function renderSettings(){
   return `<div class="settings">
     <div class="sec-lbl">Profil</div>
@@ -3391,6 +3579,13 @@ function renderSettings(){
       <div class="set-row" style="padding-top:0">
         <button class="logout-btn" id="logoutBtn">Abmelden</button>
       </div>
+    </div>
+    <div class="sec-lbl">Speicher</div>
+    <div class="field-card">
+      ${(()=>{ const u = storageUsage(); const col = u.pct>85?'var(--p1)':u.pct>60?'var(--p2)':'var(--on)';
+        return `<div class="storage-top"><span>Belegt</span><span class="storage-val">${fmtSize(u.bytes)} / 1 GB</span></div>
+        <div class="storage-bar"><div class="storage-fill" style="width:${u.pct}%;background:${col}"></div></div>
+        <div class="set-hint" style="margin-top:8px">Fotos werden vor dem Hochladen automatisch verkleinert, um Platz zu sparen. Anhänge werden gelöscht, wenn die Aufgabe endgültig (aus dem Papierkorb) entfernt wird.</div>`; })()}
     </div>
     <div class="sec-lbl">Daten</div>
     <div class="field-card">
@@ -3702,6 +3897,8 @@ function bindRoot(){
       areaDelete(id); AREA_OPEN = null; render();
     }
   };
+  const aIcon = document.querySelector('[data-areaicon]');
+  if (aIcon) aIcon.onclick = () => openAreaIconSheet(aIcon.dataset.areaicon);
 
   // ── Sport-Handler ──
   document.querySelectorAll('[data-sport]').forEach(b => b.onclick = () => { SPORT_TAB = b.dataset.sport; SPORT_DAY = null; render(); window.scrollTo(0,0); });
@@ -3923,10 +4120,16 @@ function bindRoot(){
   const itemAdd = document.querySelector('[data-noteitemadd]');
   if (itemAdd) itemAdd.onclick = () => {
     const n = NOTES.find(x=>x.id===NOTE_OPEN);
-    if (n){ if (!n.items) n.items=[]; n.items.push({text:'',done:false}); noteSave(n); render();
+    if (n){ if (!n.items) n.items=[]; n.items.push({text:'',done:false,level:0}); noteSave(n); render();
       setTimeout(()=>{ const inputs = document.querySelectorAll('[data-noteitemtext]'); const last = inputs[inputs.length-1]; if (last) last.focus(); }, 50);
     }
   };
+  // Ebene eines Checklisten-Eintrags wechseln (0 ⇄ 1)
+  document.querySelectorAll('[data-noteindent]').forEach(b => b.onclick = () => {
+    const idx = +b.dataset.noteindent;
+    const n = NOTES.find(x=>x.id===NOTE_OPEN);
+    if (n && n.items[idx]){ n.items[idx].level = n.items[idx].level ? 0 : 1; noteSave(n); render(); }
+  });
   const noteDel = document.querySelector('[data-notedelete]');
   if (noteDel) noteDel.onclick = () => {
     if (confirm('Diese Notiz wirklich löschen?')){
@@ -5010,6 +5213,24 @@ function renderSheet(){
     h += `</div>`;
   }
 
+  // Anhang (Aufgabe + Erinnerung) — genau 1 Datei. Nur bei gespeicherten Aufgaben (brauchen ID).
+  h += `<div class="sec-lbl">Anhang</div>`;
+  if (!d.id){
+    h += `<div class="attach-hint">Speichere die Aufgabe zuerst, dann kannst du einen Anhang hinzufügen.</div>`;
+  } else if (d.attach && d.attach.path){
+    const isImg = d.attach.type && d.attach.type.startsWith('image/');
+    h += `<div class="attach-card">
+      <button class="attach-open" data-attachopen="${esc(d.id)}">
+        <span class="attach-ic">${isImg?IC.image:IC.paperclip}</span>
+        <span class="attach-info"><span class="attach-name">${esc(d.attach.name||'Anhang')}</span><span class="attach-meta">${isImg?'Bild':'Datei'}${d.attach.size?` · ${fmtSize(d.attach.size)}`:''}</span></span>
+      </button>
+      <button class="attach-del" data-attachdel="${esc(d.id)}" aria-label="Anhang entfernen">${IC.trash2}</button>
+    </div>`;
+  } else {
+    h += `<button class="attach-add" id="attachAdd">${IC.paperclip} Foto oder Datei anhängen</button>
+      <input type="file" id="attachFileInput" accept="image/*,application/pdf" style="display:none">`;
+  }
+
   if (d.id){
     h += `<button class="del-btn" id="sheetDel">${IC.trash2}Löschen</button>`;
   }
@@ -5156,6 +5377,29 @@ function bindSheet(){
   document.querySelectorAll('[data-subdel]').forEach(b => b.onclick = () => { DRAFT.subtasks.splice(+b.dataset.subdel,1); renderSheet(); });
   const sa = $('subAdd');
   if (sa) sa.onclick = () => { DRAFT.subtasks.push({ id:'s'+uid(), text:'', done:false }); renderSheet(); };
+
+  // Anhang: hinzufügen / öffnen / entfernen
+  const attachAdd = $('attachAdd');
+  if (attachAdd){
+    const fi = $('attachFileInput');
+    attachAdd.onclick = () => fi && fi.click();
+    if (fi) fi.onchange = async e => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      await uploadTaskAttachment(DRAFT.id, file);
+      // DRAFT mit dem echten Task synchronisieren, damit das Sheet den Anhang zeigt
+      const real = [...TASKS, ...TRASH].find(x => x.id === DRAFT.id);
+      if (real) DRAFT.attach = real.attach;
+      renderSheet();
+    };
+  }
+  document.querySelectorAll('[data-attachopen]').forEach(b => b.onclick = () => openTaskAttachment(b.dataset.attachopen));
+  document.querySelectorAll('[data-attachdel]').forEach(b => b.onclick = () => {
+    if (!confirm('Anhang entfernen?')) return;
+    removeTaskAttachment(b.dataset.attachdel);
+    DRAFT.attach = null;
+    renderSheet();
+  });
 
   // Wheels: Scroll-Snap → Wert übernehmen
   document.querySelectorAll('[data-wheel]').forEach(w => {
