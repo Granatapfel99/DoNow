@@ -5629,29 +5629,44 @@ async function boot(){
    Läuft nur über http(s); bei file:// wird es übersprungen. */
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   const swCode = `
-    const CACHE = 'donow-v1';
+    const CACHE = 'donow-v2';
     self.addEventListener('install', e => { self.skipWaiting(); });
-    self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); });
+    self.addEventListener('activate', e => {
+      // Alte Caches aufräumen, damit keine veraltete App-Shell hängen bleibt
+      e.waitUntil(
+        caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+          .then(() => self.clients.claim())
+      );
+    });
     self.addEventListener('fetch', e => {
       const url = e.request.url;
-      // Supabase-/API-Anfragen NIE cachen (immer live), nur die App-Shell
+      // Supabase-/API-Anfragen NIE anfassen (immer live)
       if (url.includes('supabase.co') || url.includes('supabase.in') || e.request.method !== 'GET') return;
+      // NETWORK-FIRST: immer zuerst die frische Version holen (damit Updates sofort ankommen),
+      // nur bei Offline auf den Cache zurückfallen. Das war vorher cache-first → Updates blieben hängen.
       e.respondWith(
-        caches.open(CACHE).then(cache =>
-          cache.match(e.request).then(hit =>
-            hit || fetch(e.request).then(resp => {
-              try { if (resp && resp.status === 200 && (url.startsWith('http'))) cache.put(e.request, resp.clone()); } catch(_) {}
-              return resp;
-            }).catch(() => hit)
-          )
-        )
+        fetch(e.request).then(resp => {
+          try { if (resp && resp.status === 200 && url.startsWith('http')) {
+            const clone = resp.clone();
+            caches.open(CACHE).then(cache => cache.put(e.request, clone));
+          }} catch(_){}
+          return resp;
+        }).catch(() => caches.open(CACHE).then(cache => cache.match(e.request)))
       );
     });
   `;
   const blob = new Blob([swCode], { type: 'application/javascript' });
   const swUrl = URL.createObjectURL(blob);
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register(swUrl).catch(() => {});
+    navigator.serviceWorker.register(swUrl).then(reg => {
+      // Bei Updates den neuen SW sofort übernehmen lassen
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (nw) nw.addEventListener('statechange', () => {
+          if (nw.state === 'activated') {/* neue Version aktiv */}
+        });
+      });
+    }).catch(() => {});
   });
 }
 
