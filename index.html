@@ -23,13 +23,14 @@
   --accent:#ffffff; --accent-dim:#7a7468; --on:#3ad97f;
   --p1:#ff5d4d; --p2:#ffb13d; --p3:#6db4d6; --info:#b08cff;
   /* abstrahierte Hilfsfarben (damit Light-Mode überall greift) */
-  --elev:var(--elev);     /* leicht erhöhte Fläche */
-  --elev-hi:var(--elev-hi);  /* stärker erhöht / Scrollbar */
-  --elev-hover:var(--elev-hover);
+  --elev:rgba(255,255,255,.06);     /* leicht erhöhte Fläche */
+  --elev-hi:rgba(255,255,255,.13);  /* stärker erhöht / Scrollbar */
+  --elev-hover:rgba(255,255,255,.22);
   --shadow:rgba(0,0,0,.35);
-  --glow1:var(--elev);
+  --glow1:rgba(255,255,255,.05);
   --glow2:rgba(109,180,214,.05);
   --accent-on:#10100c;              /* Textfarbe auf Akzent-Flächen */
+  --nav-bg:rgba(18,17,14,.97);      /* Bottom-Nav-Hintergrund (Handy) */
 }
 [data-theme="light"]{
   --bg:#f4f2ec; --card:#ffffff; --card-hi:#eceae2;
@@ -43,6 +44,7 @@
   --glow1:rgba(0,0,0,.025);
   --glow2:rgba(58,127,163,.06);
   --accent-on:#ffffff;
+  --nav-bg:rgba(248,246,240,.97);   /* helle Bottom-Nav */
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 /* Dezente, zum Theme passende Scrollbars überall */
@@ -125,7 +127,7 @@ svg{width:18px;height:18px;display:block;}
   .sidebar{display:none;}
   .main{flex:1;min-width:0;}
   .content{padding:20px 16px 98px;max-width:100%;}
-  .botnav{display:flex;position:fixed;bottom:0;left:0;right:0;background:rgba(18,17,14,.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);z-index:90;padding:6px 4px 18px;}
+  .botnav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--nav-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);z-index:90;padding:6px 4px 18px;}
   .botnav button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 2px;color:var(--faint);font-size:9.5px;font-weight:600;border:none;background:none;cursor:pointer;transition:.13s;position:relative;}
   .botnav button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .botnav button svg{width:21px;height:21px;flex-shrink:0;}
@@ -978,7 +980,13 @@ body.dnd-active .sport-ex{user-select:none;-webkit-user-select:none;}
 "use strict";
 
 /* Theme sofort anwenden, bevor irgendwas rendert (verhindert Flackern) */
-try{ if ((localStorage.getItem('pilot.theme')||'dark') === 'light') document.documentElement.setAttribute('data-theme','light'); }catch(e){}
+try{
+  if ((localStorage.getItem('pilot.theme')||'dark') === 'light'){
+    document.documentElement.setAttribute('data-theme','light');
+    const m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', '#f4f2ec');
+  }
+}catch(e){}
 
 /* ═══════════════════════════════════════════════════════════════════════
    DoNow — Standalone, Supabase-synchron
@@ -1670,6 +1678,9 @@ function getTheme(){ return localStorage.getItem('pilot.theme') || 'dark'; }
 function applyTheme(t){
   if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
   else document.documentElement.removeAttribute('data-theme');
+  // Statusleisten-Farbe (Handy) mitziehen
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', t === 'light' ? '#f4f2ec' : '#100f0d');
 }
 function setTheme(t){
   try{ localStorage.setItem('pilot.theme', t); }catch(e){}
