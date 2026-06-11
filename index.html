@@ -376,6 +376,10 @@ svg{width:18px;height:18px;display:block;}
 .note-title-in:focus{border-color:var(--accent-dim);}
 .note-body-in{width:100%;box-sizing:border-box;min-height:300px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;color:var(--text);font-size:15px;line-height:1.6;outline:none;resize:vertical;font-family:inherit;}
 .note-body-in:focus{border-color:var(--accent-dim);}
+.note-body-read{width:100%;box-sizing:border-box;min-height:300px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;color:var(--text);font-size:15px;line-height:1.6;font-family:inherit;cursor:text;white-space:pre-wrap;word-break:break-word;}
+.note-body-read:hover{border-color:#3a362e;}
+.inline-link{color:var(--accent);text-decoration:underline;text-underline-offset:2px;word-break:break-all;}
+.inline-link:hover{opacity:.8;}
 .note-check-list{display:flex;flex-direction:column;gap:8px;}
 .note-check-row{display:flex;align-items:center;gap:10px;}
 .note-check-box{width:24px;height:24px;border-radius:7px;border:1.8px solid var(--line);background:none;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;transition:.13s;}
@@ -947,6 +951,7 @@ let SPORT_DAY = null;    // aktuell geöffneter Trainingstag-Index oder null
 let NUTRI_DAY = null;    // aktuell geöffneter Ernährungstag-Index oder null
 let NOTES = [];          // Notizen (_kind:"note", referenzieren areaId)
 let NOTE_OPEN = null;    // aktuell geöffnete Notiz-ID oder null
+let NOTE_EDITING = false; // Freitext-Notiz im Bearbeiten-Modus (sonst Lese-Ansicht mit klickbaren Links)
 let DOC_FOLDER = null;   // offener Dokumente-Ordner (id) oder null (Wurzel)
 const SPORT_AREA_ID = 'area-sport';   // feste ID des Sport-Bereichs
 let NAME  = localStorage.getItem('pilot.name') || '';
@@ -1311,6 +1316,32 @@ const startOfDay = d => { const x = new Date(d); x.setHours(0,0,0,0); return x; 
 const possessive = n => !n.trim() ? "" : (/[sßxz]$/i.test(n.trim()) ? n.trim()+"'" : n.trim()+"s");
 const statusOf = t => t.status || (t.done ? "erledigt" : "offen");
 const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* Wandelt Freitext in sicheres HTML um UND macht URLs klickbar.
+   Reihenfolge ist wichtig: erst escapen (gegen HTML-Injection), dann verlinken.
+   Erkennt: https://… , http://… und www.…  Schließende Satzzeichen (.,;:!?)
+   und Klammern werden NICHT mit in den Link gezogen. */
+function linkify(text){
+  const escaped = esc(text);
+  // URL-Muster auf dem bereits escapten Text. & ist hier &amp;, daher tolerant.
+  const urlRe = /\b(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi;
+  return escaped.replace(urlRe, (match) => {
+    // Trailing-Satzzeichen/Klammern vom Link abtrennen (z. B. "(https://x.de)." )
+    let url = match;
+    let trail = '';
+    const trailMatch = url.match(/(&amp;|[.,;:!?)\]]+)$/);
+    while (true){
+      const m = url.match(/(&amp;|[.,;:!?)\]])$/);
+      if (!m) break;
+      trail = m[1] + trail;
+      url = url.slice(0, url.length - m[1].length);
+    }
+    if (!url) return match;
+    // href braucht ein Schema; www. → https:// davor
+    const href = /^www\./i.test(url) ? 'https://' + url : url;
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="inline-link">${url}</a>${trail}`;
+  });
+}
 
 function timeAgo(ts){
   if (!ts) return "gerade eben";
@@ -1995,7 +2026,7 @@ function taskCardHTML(t){
       <button class="cbox ${isRem?'rem':''} ${t.done?'checked':''}" data-toggle="${esc(t.id)}" aria-label="Erledigt">${t.done?IC.check:''}</button>
       <div class="t-body" data-edit="${esc(t.id)}">
         <div class="t-head">${(isRem || t.notify)?'<span class="bell-i" style="display:flex">'+IC.bell+'</span>':''}${t.fav?'<span class="fav-i">'+IC.star+'</span>':''}<span class="t-text">${esc(t.text)}</span></div>
-        ${t.notes?`<div class="t-notes">${esc(t.notes)}</div>`:''}
+        ${t.notes?`<div class="t-notes">${linkify(t.notes)}</div>`:''}
         ${meta}
         ${subs}
       </div>
@@ -2571,7 +2602,12 @@ function renderNoteDetail(note){
     h += `</div>`;
     h += `<button class="note-additem" data-noteitemadd="1">${IC.plus} Eintrag</button>`;
   } else {
-    h += `<textarea class="note-body-in" id="noteBody" placeholder="Schreib los…">${esc(note.body||'')}</textarea>`;
+    // Freitext: Lese-Ansicht mit klickbaren Links, oder Textfeld beim Bearbeiten.
+    if (NOTE_EDITING || !(note.body||'').trim()){
+      h += `<textarea class="note-body-in" id="noteBody" placeholder="Schreib los…">${esc(note.body||'')}</textarea>`;
+    } else {
+      h += `<div class="note-body-read" id="noteBodyRead">${linkify(note.body).replace(/\n/g,'<br>')}</div>`;
+    }
   }
   // Verknüpfungen (zu Ordnern/Dokumenten innerhalb DoNow)
   h += `<div class="note-links">`;
@@ -3778,14 +3814,14 @@ function bindRoot(){
 
   // ── Notiz-Detail-Handler ──
   const noteBack = document.querySelector('[data-noteback]');
-  if (noteBack) noteBack.onclick = () => { NOTE_OPEN = null; render(); window.scrollTo(0,0); };
+  if (noteBack) noteBack.onclick = () => { NOTE_OPEN = null; NOTE_EDITING = false; render(); window.scrollTo(0,0); };
   // Notizen anlegen/öffnen
   document.querySelectorAll('[data-noteadd]').forEach(b => b.onclick = () => {
     const [areaId, type] = b.dataset.noteadd.split(':');
     const note = noteCreate(areaId, type);
     NOTE_OPEN = note.id; render(); window.scrollTo(0,0);
   });
-  document.querySelectorAll('[data-noteopen]').forEach(b => b.onclick = () => { NOTE_OPEN = b.dataset.noteopen; render(); window.scrollTo(0,0); });
+  document.querySelectorAll('[data-noteopen]').forEach(b => b.onclick = () => { NOTE_OPEN = b.dataset.noteopen; NOTE_EDITING = false; render(); window.scrollTo(0,0); });
   // Dokumente: Upload + Löschen
   const docUp = document.querySelector('[data-docupload]');
   if (docUp){
@@ -3852,7 +3888,19 @@ function bindRoot(){
   const nt = $('noteTitle');
   if (nt) nt.oninput = () => { const n = NOTES.find(x=>x.id===NOTE_OPEN); if (n){ n.title = nt.value; noteSave(n); } };
   const nb = $('noteBody');
-  if (nb) nb.oninput = () => { const n = NOTES.find(x=>x.id===NOTE_OPEN); if (n){ n.body = nb.value; noteSave(n); } };
+  if (nb){
+    nb.oninput = () => { const n = NOTES.find(x=>x.id===NOTE_OPEN); if (n){ n.body = nb.value; noteSave(n); } };
+    // Verlässt man das Textfeld, zurück in die Lese-Ansicht (Links klickbar)
+    nb.onblur = () => { if (NOTE_EDITING){ NOTE_EDITING = false; render(); } };
+    // Beim Öffnen ins Bearbeiten direkt fokussieren + Cursor ans Ende
+    if (NOTE_EDITING){ nb.focus(); const v = nb.value; nb.value = ''; nb.value = v; }
+  }
+  // Lese-Ansicht antippen → Bearbeiten-Modus (außer man klickt einen Link)
+  const nbRead = $('noteBodyRead');
+  if (nbRead) nbRead.onclick = e => {
+    if (e.target.closest('a')) return;   // Link anklicken, nicht bearbeiten
+    NOTE_EDITING = true; render();
+  };
   // Checklisten-Items
   document.querySelectorAll('[data-notetoggle]').forEach(b => b.onclick = () => {
     const idx = +b.dataset.notetoggle;
