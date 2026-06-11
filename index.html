@@ -1259,7 +1259,7 @@ function advanceDate(date, r){
   return d;
 }
 const STATUSES = [["offen","Offen"],["in_arbeit","In Arbeit"],["on_hold","On Hold"],["info","Info"],["erledigt","Erledigt"]];
-const STATUS_META = { offen:{lbl:"Offen",c:"var(--p1)"}, in_arbeit:{lbl:"In Arbeit",c:"var(--p3)"}, on_hold:{lbl:"On Hold",c:"var(--p2)"}, info:{lbl:"Info",c:"var(--info)"} };
+const STATUS_META = { offen:{lbl:"Offen",c:"var(--faint)"}, in_arbeit:{lbl:"In Arbeit",c:"var(--p3)"}, on_hold:{lbl:"On Hold",c:"var(--p2)"}, info:{lbl:"Info",c:"var(--info)"}, erledigt:{lbl:"Erledigt",c:"var(--on)"} };
 const PRIO = { 1:{c:"var(--p1)",t:"P1"}, 2:{c:"var(--p2)",t:"P2"}, 3:{c:"var(--p3)",t:"P3"}, 0:{c:"transparent",t:""} };
 const EFFORTS = [["","–"],["15","15 min"],["30","30 min"],["60","1 Std"],["120","2 Std+"]];
 const EFFORT_LBL = { "15":"15 min", "30":"30 min", "60":"1 Std", "120":"2 Std+" };
@@ -1997,10 +1997,8 @@ function taskCardHTML(t){
   const open = openSubsState[t.id];
   const isRem = t.type === "reminder";
   const stKey = statusOf(t);
-  // „Offen" nur zeigen, wenn keine Priorität gesetzt ist (sonst doppelt-rot mit P-Flag).
-  // „Erledigt" nie als Chip (Karte ist eh durchgestrichen).
-  const showStatus = stKey !== "erledigt" && !(stKey === "offen" && t.priority > 0);
-  const st = showStatus ? STATUS_META[stKey] : null;
+  // Status immer als Chip zeigen — konsistent, auch „Offen" und „Erledigt".
+  const st = STATUS_META[stKey] || STATUS_META.offen;
   const flagFill = c => IC.flag.replace('CURRENTFILL', c);
 
   let meta = '';
@@ -2029,7 +2027,7 @@ function taskCardHTML(t){
   const flagIcon = '<svg viewBox="0 0 24 24" fill="'+(p.c)+'" stroke="'+p.c+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>';
 
   return `<div class="task ${t.done?'done':''}" data-card="${esc(t.id)}">
-    <div class="pbar" style="background:${p.c}"></div>
+    <div class="pbar" style="background:${st.c}"></div>
     <div class="task-row">
       <button class="cbox ${isRem?'rem':''} ${t.done?'checked':''}" data-toggle="${esc(t.id)}" aria-label="Erledigt">${t.done?IC.check:''}</button>
       <div class="t-body" data-edit="${esc(t.id)}">
@@ -2199,9 +2197,7 @@ function renderAreas(active){
     h += `<div class="area-grid">`;
     cats.forEach((c,i) => {
       const m = map[c] || { count:0, minutes:0 };
-      const hue = (i*67) % 360;   // jedem Bereich eine eigene, dezente Farbe
       h += `<div class="area-card" data-catfilter="${esc(c)}">
-        <div class="area-bar" style="background:hsl(${hue} 55% 60%)"></div>
         <div class="area-main">
           <div class="area-name">${esc(c)}</div>
           <div class="area-stats">${m.count} ${m.count===1?'Aufgabe':'Aufgaben'}${m.minutes?` · ~${fmtTime(m.minutes)}`:''}</div>
@@ -2216,7 +2212,6 @@ function renderAreas(active){
     if (map["__none__"]){
       const m = map["__none__"];
       h += `<div class="area-card muted" data-catfilter="__none__">
-        <div class="area-bar" style="background:var(--faint)"></div>
         <div class="area-main"><div class="area-name">Ohne Bereich</div><div class="area-stats">${m.count} ${m.count===1?'Aufgabe':'Aufgaben'}${m.minutes?` · ~${fmtTime(m.minutes)}`:''}</div></div>
       </div>`;
     }
