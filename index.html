@@ -407,15 +407,16 @@ svg{width:18px;height:18px;display:block;}
 .inline-link::before{content:"\2197";display:inline-block;font-size:.85em;margin-right:1px;opacity:.7;text-decoration:none;}
 .inline-link:hover{opacity:.8;}
 .note-check-list{display:flex;flex-direction:column;gap:8px;}
-.note-check-row{display:flex;align-items:center;gap:8px;}
+.note-check-row{display:flex;align-items:center;gap:8px;position:relative;}
 .note-check-row.parent .note-check-text{font-weight:600;}
-.note-check-row.lvl1{margin-left:30px;position:relative;}
-.note-check-row.lvl1::before{content:"";position:absolute;left:-16px;top:50%;width:10px;height:1px;background:var(--line);}
+.note-check-conn{position:absolute;left:-14px;top:50%;width:9px;height:1px;background:var(--line);}
 .check-subcount{font-family:'JetBrains Mono';font-size:11px;color:var(--faint);flex-shrink:0;padding:2px 7px;background:var(--card-hi);border-radius:99px;}
-.note-check-indent{background:none;border:none;color:var(--faint);cursor:pointer;padding:4px;flex-shrink:0;display:flex;opacity:.5;transition:.13s;}
-.note-check-indent svg{width:14px;height:14px;}
-.note-check-indent:hover{opacity:1;color:var(--text);}
-.note-check-row.lvl1 .note-check-box{width:21px;height:21px;}
+.note-check-tools{display:flex;align-items:center;gap:1px;flex-shrink:0;}
+.note-check-mini{background:none;border:none;color:var(--faint);cursor:pointer;padding:4px;display:flex;opacity:.55;transition:.13s;border-radius:6px;}
+.note-check-mini svg{width:15px;height:15px;}
+.note-check-mini:hover{opacity:1;color:var(--text);background:var(--elev);}
+.note-check-mini:disabled{opacity:.18;cursor:default;}
+.note-check-mini:disabled:hover{background:none;color:var(--faint);}
 .note-check-box{width:24px;height:24px;border-radius:7px;border:1.8px solid var(--line);background:none;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;transition:.13s;}
 .note-check-box.on{background:var(--on);border-color:var(--on);}
 .note-check-box svg{width:14px;height:14px;}
@@ -1375,6 +1376,8 @@ const IC = {
   chevDown:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>',
   chevRight:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>',
   chevLeft:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>',
+  chevUp:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>',
+  chevDown:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>',
   x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
   cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
   clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
@@ -2854,20 +2857,29 @@ function renderNoteDetail(note){
     const items = note.items || [];
     h += `<div class="note-check-list" id="noteCheckList">`;
     items.forEach((it, idx) => {
-      const lvl = it.level||0;
-      // Hat dieser Oberpunkt Unterpunkte? (für Fortschritts-Anzeige)
+      const lvl = checkLevel(it);
+      // Fortschritts-Anzeige: hat dieser Eintrag direkte Kinder (level+1)?
       let subInfo = '';
-      if (lvl === 0){
-        let subs = 0, subsDone = 0;
-        for (let j = idx+1; j < items.length && (items[j].level||0) === 1; j++){ subs++; if (items[j].done) subsDone++; }
-        if (subs > 0) subInfo = `<span class="check-subcount">${subsDone}/${subs}</span>`;
-      }
-      h += `<div class="note-check-row lvl${lvl} ${lvl===0?'parent':''}" data-noteitemidx="${idx}">
-        <button class="note-check-indent" data-noteindent="${idx}" aria-label="Ebene wechseln" title="${lvl?'Ausrücken':'Einrücken'}">${lvl?IC.outdent:IC.indent}</button>
+      const end = checkBlockEnd(items, idx);
+      let subs = 0, subsDone = 0;
+      for (let j = idx+1; j < end; j++){ if (checkLevel(items[j]) === lvl+1){ subs++; if (items[j].done) subsDone++; } }
+      if (subs > 0) subInfo = `<span class="check-subcount">${subsDone}/${subs}</span>`;
+      // Einrücken nur erlaubt, wenn der Vorgänger das zulässt (max. eine Stufe tiefer als er)
+      const prevLvl = idx > 0 ? checkLevel(items[idx-1]) : -1;
+      const canIndent = idx > 0 && lvl <= prevLvl;
+      const canOutdent = lvl > 0;
+      h += `<div class="note-check-row ${subs>0?'parent':''}" data-noteitemidx="${idx}" style="margin-left:${lvl*26}px">
+        ${lvl>0?'<span class="note-check-conn"></span>':''}
         <button class="note-check-box ${it.done?'on':''}" data-notetoggle="${idx}" aria-label="Abhaken">${it.done?IC.check_sm:''}</button>
         <input class="note-check-text ${it.done?'done':''}" data-noteitemtext="${idx}" value="${esc(it.text||'')}" placeholder="${lvl?'Unterpunkt…':'Punkt…'}">
         ${subInfo}
-        <button class="note-check-del" data-noteitemdel="${idx}" aria-label="Löschen">${IC.x}</button>
+        <div class="note-check-tools">
+          <button class="note-check-mini" data-noteup="${idx}" aria-label="Nach oben" ${idx===0?'disabled':''}>${IC.chevUp||IC.chevLeft}</button>
+          <button class="note-check-mini" data-notedown="${idx}" aria-label="Nach unten" ${idx===items.length-1?'disabled':''}>${IC.chevDown||IC.chevRight}</button>
+          <button class="note-check-mini" data-noteoutdent="${idx}" aria-label="Ausrücken" ${canOutdent?'':'disabled'}>${IC.outdent}</button>
+          <button class="note-check-mini" data-noteindent="${idx}" aria-label="Einrücken" ${canIndent?'':'disabled'}>${IC.indent}</button>
+          <button class="note-check-del" data-noteitemdel="${idx}" aria-label="Löschen">${IC.x}</button>
+        </div>
       </div>`;
     });
     h += `</div>`;
@@ -3032,6 +3044,48 @@ function noteCreate(areaId, type){
   return note;
 }
 function noteSave(note){ note.updatedAt = Date.now(); pushUpsert(note, false); }
+
+/* ── Checklisten-Hilfsfunktionen (beliebig tiefe Verschachtelung) ──
+   Ein „Block" ist ein Eintrag plus alle seine Nachkommen (folgende Einträge mit
+   höherem level, bis ein Eintrag mit gleichem oder niedrigerem level kommt). */
+function checkLevel(it){ return it.level || 0; }
+// Index nach dem letzten Nachkommen von idx (= Ende des Blocks, exklusiv)
+function checkBlockEnd(items, idx){
+  const base = checkLevel(items[idx]);
+  let j = idx + 1;
+  while (j < items.length && checkLevel(items[j]) > base) j++;
+  return j;
+}
+// Findet den direkten Elternteil-Index von idx (nächster vorheriger Eintrag mit kleinerem level)
+function checkParent(items, idx){
+  const lvl = checkLevel(items[idx]);
+  if (lvl === 0) return -1;
+  for (let j = idx - 1; j >= 0; j--){ if (checkLevel(items[j]) < lvl) return j; }
+  return -1;
+}
+// Setzt einen Eintrag + alle Nachkommen auf done = state
+function checkSetBlockDone(items, idx, state){
+  const end = checkBlockEnd(items, idx);
+  for (let j = idx; j < end; j++) items[j].done = state;
+}
+// Gleicht den Status aller Vorfahren an: alle direkten Kinder erledigt → Elternteil erledigt (rekursiv nach oben)
+function checkRefreshAncestors(items, idx){
+  let cur = idx;
+  while (true){
+    const p = checkParent(items, cur);
+    if (p < 0) break;
+    const pLvl = checkLevel(items[p]);
+    // direkte Kinder von p: Einträge mit level == pLvl+1 innerhalb des Blocks von p
+    const end = checkBlockEnd(items, p);
+    let allDone = true, anyChild = false;
+    for (let j = p + 1; j < end; j++){
+      if (checkLevel(items[j]) === pLvl + 1){ anyChild = true; if (!items[j].done) allDone = false; }
+    }
+    items[p].done = anyChild ? allDone : items[p].done;
+    cur = p;
+  }
+}
+
 function noteDelete(id){
   const obj = NOTES.find(n => n.id === id);
   // Sicherheitsnetz: Ist es in Wahrheit ein Ordner? Dann über docFolderDelete (Docs bleiben erhalten).
@@ -4353,22 +4407,9 @@ function bindRoot(){
     const n = NOTES.find(x=>x.id===NOTE_OPEN);
     if (!n || !n.items[idx]) return;
     const newState = !n.items[idx].done;
-    n.items[idx].done = newState;
-    // Ist es ein Oberpunkt? Dann alle folgenden Unterpunkte (level 1) mitnehmen.
-    if ((n.items[idx].level||0) === 0){
-      for (let j = idx+1; j < n.items.length && (n.items[j].level||0) === 1; j++){
-        n.items[j].done = newState;
-      }
-    } else {
-      // Unterpunkt geändert → Oberpunkt-Status angleichen (alle Unter erledigt → Ober erledigt)
-      let parent = -1;
-      for (let j = idx; j >= 0; j--){ if ((n.items[j].level||0) === 0){ parent = j; break; } }
-      if (parent >= 0){
-        let allDone = true;
-        for (let j = parent+1; j < n.items.length && (n.items[j].level||0) === 1; j++){ if (!n.items[j].done) allDone = false; }
-        n.items[parent].done = allDone;
-      }
-    }
+    // Eintrag + alle Nachkommen mitnehmen, dann Vorfahren angleichen
+    checkSetBlockDone(n.items, idx, newState);
+    checkRefreshAncestors(n.items, idx);
     noteSave(n); render();
   });
   document.querySelectorAll('[data-noteitemtext]').forEach(inp => inp.oninput = () => {
@@ -4380,12 +4421,9 @@ function bindRoot(){
     const idx = +b.dataset.noteitemdel;
     const n = NOTES.find(x=>x.id===NOTE_OPEN);
     if (!n) return;
-    // Oberpunkt löschen → seine Unterpunkte mitlöschen
-    let removeCount = 1;
-    if ((n.items[idx].level||0) === 0){
-      for (let j = idx+1; j < n.items.length && (n.items[j].level||0) === 1; j++){ removeCount++; }
-    }
-    n.items.splice(idx, removeCount); noteSave(n); render();
+    // Eintrag + alle Nachkommen löschen (ganzer Block)
+    const end = checkBlockEnd(n.items, idx);
+    n.items.splice(idx, end - idx); noteSave(n); render();
   });
   const itemAdd = document.querySelector('[data-noteitemadd]');
   if (itemAdd) itemAdd.onclick = () => {
@@ -4394,11 +4432,61 @@ function bindRoot(){
       setTimeout(()=>{ const inputs = document.querySelectorAll('[data-noteitemtext]'); const last = inputs[inputs.length-1]; if (last) last.focus(); }, 50);
     }
   };
-  // Ebene eines Checklisten-Eintrags wechseln (0 ⇄ 1)
+  // Einrücken: eine Stufe tiefer (max. eine mehr als Vorgänger). Nachkommen wandern mit.
   document.querySelectorAll('[data-noteindent]').forEach(b => b.onclick = () => {
     const idx = +b.dataset.noteindent;
     const n = NOTES.find(x=>x.id===NOTE_OPEN);
-    if (n && n.items[idx]){ n.items[idx].level = n.items[idx].level ? 0 : 1; noteSave(n); render(); }
+    if (!n || !n.items[idx] || idx === 0) return;
+    const lvl = checkLevel(n.items[idx]);
+    const prevLvl = checkLevel(n.items[idx-1]);
+    if (lvl > prevLvl) return; // würde Lücke erzeugen
+    const end = checkBlockEnd(n.items, idx);
+    for (let j = idx; j < end; j++) n.items[j].level = checkLevel(n.items[j]) + 1;
+    checkRefreshAncestors(n.items, idx);
+    noteSave(n); render();
+  });
+  // Ausrücken: eine Stufe höher. Nachkommen wandern mit.
+  document.querySelectorAll('[data-noteoutdent]').forEach(b => b.onclick = () => {
+    const idx = +b.dataset.noteoutdent;
+    const n = NOTES.find(x=>x.id===NOTE_OPEN);
+    if (!n || !n.items[idx]) return;
+    const lvl = checkLevel(n.items[idx]);
+    if (lvl === 0) return;
+    const end = checkBlockEnd(n.items, idx);
+    for (let j = idx; j < end; j++) n.items[j].level = Math.max(0, checkLevel(n.items[j]) - 1);
+    checkRefreshAncestors(n.items, idx);
+    noteSave(n); render();
+  });
+  // Block nach oben verschieben (Eintrag + Nachkommen tauschen mit vorherigem Geschwister-Block)
+  document.querySelectorAll('[data-noteup]').forEach(b => b.onclick = () => {
+    const idx = +b.dataset.noteup;
+    const n = NOTES.find(x=>x.id===NOTE_OPEN);
+    if (!n || idx === 0) return;
+    const blockEnd = checkBlockEnd(n.items, idx);
+    const block = n.items.slice(idx, blockEnd);
+    // Vorherigen Block-Anfang finden (Eintrag direkt davor gehört zu welchem Block-Start?)
+    let prevStart = idx - 1;
+    const prevLvl = checkLevel(n.items[idx-1]);
+    while (prevStart > 0 && checkLevel(n.items[prevStart-1]) > prevLvl) prevStart--;
+    // nur tauschen, wenn der vorherige Eintrag dasselbe oder höheres Level hat (Geschwister/Onkel)
+    n.items.splice(idx, block.length);
+    n.items.splice(prevStart, 0, ...block);
+    noteSave(n); render();
+  });
+  // Block nach unten verschieben
+  document.querySelectorAll('[data-notedown]').forEach(b => b.onclick = () => {
+    const idx = +b.dataset.notedown;
+    const n = NOTES.find(x=>x.id===NOTE_OPEN);
+    if (!n) return;
+    const blockEnd = checkBlockEnd(n.items, idx);
+    if (blockEnd >= n.items.length) return; // schon am Ende
+    const block = n.items.slice(idx, blockEnd);
+    // nächsten Block (ab blockEnd) überspringen, dann unseren Block dahinter einfügen
+    const nextEnd = checkBlockEnd(n.items, blockEnd);
+    n.items.splice(idx, block.length);
+    const insertAt = nextEnd - block.length;
+    n.items.splice(insertAt, 0, ...block);
+    noteSave(n); render();
   });
   const noteDel = document.querySelector('[data-notedelete]');
   if (noteDel) noteDel.onclick = async () => {
