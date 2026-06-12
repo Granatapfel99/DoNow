@@ -411,23 +411,20 @@ svg{width:18px;height:18px;display:block;}
 .note-check-row.parent .note-check-text{font-weight:600;}
 .note-check-conn{position:absolute;left:-13px;top:50%;width:9px;height:1px;background:var(--line);}
 .check-subcount{font-family:'JetBrains Mono';font-size:11px;color:var(--faint);flex-shrink:0;padding:2px 7px;background:var(--card-hi);border-radius:99px;}
-.note-check-menu{background:none;border:none;color:var(--faint);cursor:pointer;padding:7px 5px;display:flex;flex-shrink:0;border-radius:7px;opacity:.6;transition:.13s;}
-.note-check-menu svg{width:18px;height:18px;}
-.note-check-menu:hover{opacity:1;color:var(--text);background:var(--elev);}
-/* Eintrag-Aktionsmenü */
-.dialog.checkmenu{max-width:340px;}
-.checkmenu-head{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px;color:var(--text);padding:18px 20px 14px;border-bottom:1px solid var(--line);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.checkmenu-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:16px 18px 10px;}
-.checkmenu-act{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--card-hi);border:1px solid var(--line);border-radius:13px;padding:15px 8px;color:var(--text);font-size:13px;font-weight:500;cursor:pointer;font-family:'Sora',sans-serif;transition:.13s;}
-.checkmenu-act svg{width:20px;height:20px;}
-.checkmenu-act:hover:not(:disabled){border-color:var(--accent-dim);background:var(--elev-hi);}
-.checkmenu-act:active:not(:disabled){transform:scale(.97);}
-.checkmenu-act:disabled{opacity:.28;cursor:default;}
-.checkmenu-del{display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 36px);margin:4px 18px 0;background:none;border:1px solid var(--line);border-radius:11px;padding:12px;color:var(--p1);font-size:14px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;transition:.13s;}
-.checkmenu-del svg{width:16px;height:16px;}
-.checkmenu-del:hover{background:var(--p1);color:#fff;border-color:var(--p1);}
-.checkmenu-cancel{width:calc(100% - 36px);margin:9px 18px 18px;background:var(--card-hi);border:none;border-radius:11px;padding:12px;color:var(--muted);font-size:14px;font-weight:500;cursor:pointer;font-family:'Sora',sans-serif;transition:.13s;}
-.checkmenu-cancel:hover{background:var(--elev-hi);color:var(--text);}
+/* Inline-Aktionen pro Eintrag — direkt klickbar, klar gruppiert */
+.note-check-acts{display:flex;align-items:center;gap:2px;flex-shrink:0;}
+.ncbtn{background:none;border:none;color:var(--faint);cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:8px;transition:.12s;padding:0;}
+.ncbtn svg{width:17px;height:17px;}
+.ncbtn:hover:not(:disabled){background:var(--elev-hi);color:var(--text);}
+.ncbtn:active:not(:disabled){transform:scale(.9);}
+.ncbtn:disabled{opacity:.2;cursor:default;}
+.ncbtn.lvl{color:var(--accent-dim);}
+.ncbtn.lvl:hover:not(:disabled){color:var(--text);}
+.ncbtn.del{color:var(--faint);margin-left:3px;}
+.ncbtn.del:hover{background:var(--p1);color:#fff;}
+/* Verschieben- und Ebene-Gruppe leicht trennen */
+.note-check-acts .ncbtn.lvl:first-of-type{margin-left:5px;position:relative;}
+.note-check-acts .ncbtn.lvl:first-of-type::before{content:"";position:absolute;left:-3px;top:7px;bottom:7px;width:1px;background:var(--line);}
 .note-check-box{width:24px;height:24px;border-radius:7px;border:1.8px solid var(--line);background:none;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;transition:.13s;}
 .note-check-box.on{background:var(--on);border-color:var(--on);}
 .note-check-box svg{width:14px;height:14px;}
@@ -2875,12 +2872,24 @@ function renderNoteDetail(note){
       let subs = 0, subsDone = 0;
       for (let j = idx+1; j < end; j++){ if (checkLevel(items[j]) === lvl+1){ subs++; if (items[j].done) subsDone++; } }
       if (subs > 0) subInfo = `<span class="check-subcount">${subsDone}/${subs}</span>`;
-      h += `<div class="note-check-row ${subs>0?'parent':''}" data-noteitemidx="${idx}" style="margin-left:${lvl*24}px">
+      // Was ist erlaubt? (deaktivierte Buttons verhindern falsche Aktionen)
+      const prevLvl = idx > 0 ? checkLevel(items[idx-1]) : -1;
+      const canIndent = idx > 0 && lvl <= prevLvl;
+      const canOutdent = lvl > 0;
+      const canUp = idx > 0;
+      const canDown = end < items.length;
+      h += `<div class="note-check-row ${subs>0?'parent':''}" data-noteitemidx="${idx}" style="margin-left:${lvl*22}px">
         ${lvl>0?'<span class="note-check-conn"></span>':''}
         <button class="note-check-box ${it.done?'on':''}" data-notetoggle="${idx}" aria-label="Abhaken">${it.done?IC.check_sm:''}</button>
         <input class="note-check-text ${it.done?'done':''}" data-noteitemtext="${idx}" value="${esc(it.text||'')}" placeholder="${lvl?'Unterpunkt…':'Punkt…'}">
         ${subInfo}
-        <button class="note-check-menu" data-notemenu="${idx}" aria-label="Optionen">${IC.dots}</button>
+        <div class="note-check-acts">
+          <button class="ncbtn move" data-noteup="${idx}" aria-label="Nach oben" ${canUp?'':'disabled'}>${IC.chevUp}</button>
+          <button class="ncbtn move" data-notedown="${idx}" aria-label="Nach unten" ${canDown?'':'disabled'}>${IC.chevDown}</button>
+          <button class="ncbtn lvl" data-noteoutdent="${idx}" aria-label="Ausrücken" ${canOutdent?'':'disabled'}>${IC.chevLeft}</button>
+          <button class="ncbtn lvl" data-noteindent="${idx}" aria-label="Einrücken" ${canIndent?'':'disabled'}>${IC.chevRight}</button>
+          <button class="ncbtn del" data-noteitemdel="${idx}" aria-label="Löschen">${IC.x}</button>
+        </div>
       </div>`;
     });
     h += `</div>`;
@@ -3141,52 +3150,6 @@ function checkItemDelete(idx){
   noteSave(n); render();
   const cnt = end - idx;
   showToast(cnt > 1 ? `${cnt} Einträge gelöscht` : 'Eintrag gelöscht');
-}
-
-/* Das ⋯-Menü für einen Checklisten-Eintrag: zeigt Verschieben + Ebene + Löschen,
-   als zwei klar getrennte Gruppen, mit großen Touch-Flächen. Nicht erlaubte
-   Aktionen werden ausgegraut, damit man nichts falsch machen kann. */
-function openCheckItemMenu(idx){
-  const n = NOTES.find(x=>x.id===NOTE_OPEN);
-  if (!n || !n.items[idx]) return;
-  const items = n.items;
-  const lvl = checkLevel(items[idx]);
-  const prevLvl = idx > 0 ? checkLevel(items[idx-1]) : -1;
-  const canIndent = idx > 0 && lvl <= prevLvl;
-  const canOutdent = lvl > 0;
-  const canUp = idx > 0;
-  const blockEnd = checkBlockEnd(items, idx);
-  const canDown = blockEnd < items.length;
-  const label = (items[idx].text||'').trim() || 'Eintrag';
-
-  const ov = document.createElement('div');
-  ov.className = 'overlay';
-  ov.innerHTML = `<div class="dialog checkmenu">
-    <div class="checkmenu-head">${esc(label)}</div>
-    <div class="checkmenu-grid">
-      <button class="checkmenu-act" data-act="up" ${canUp?'':'disabled'}>${IC.chevUp}<span>Nach oben</span></button>
-      <button class="checkmenu-act" data-act="down" ${canDown?'':'disabled'}>${IC.chevDown}<span>Nach unten</span></button>
-      <button class="checkmenu-act" data-act="out" ${canOutdent?'':'disabled'}>${IC.outdent}<span>Ausrücken</span></button>
-      <button class="checkmenu-act" data-act="in" ${canIndent?'':'disabled'}>${IC.indent}<span>Einrücken</span></button>
-    </div>
-    <button class="checkmenu-del" data-act="del">${IC.trash2} Löschen</button>
-    <button class="checkmenu-cancel" data-act="cancel">Schließen</button>
-  </div>`;
-  const close = () => { document.removeEventListener('keydown', onKey); ov.remove(); };
-  const onKey = e => { if (e.key === 'Escape') close(); };
-  ov.onmousedown = e => { if (e.target === ov) close(); };
-  document.body.appendChild(ov);
-  document.addEventListener('keydown', onKey);
-  ov.querySelectorAll('[data-act]').forEach(b => b.onclick = () => {
-    const act = b.dataset.act;
-    if (b.disabled) return;
-    if (act === 'up') checkItemUp(idx);
-    else if (act === 'down') checkItemDown(idx);
-    else if (act === 'in') checkItemIndent(idx);
-    else if (act === 'out') checkItemOutdent(idx);
-    else if (act === 'del') checkItemDelete(idx);
-    close();
-  });
 }
 
 function noteDelete(id){
@@ -4527,11 +4490,12 @@ function bindRoot(){
       setTimeout(()=>{ const inputs = document.querySelectorAll('[data-noteitemtext]'); const last = inputs[inputs.length-1]; if (last) last.focus(); }, 50);
     }
   };
-  // Das ⋯-Menü pro Eintrag öffnen
-  document.querySelectorAll('[data-notemenu]').forEach(b => b.onclick = (e) => {
-    e.stopPropagation();
-    openCheckItemMenu(+b.dataset.notemenu);
-  });
+  // Direkte Aktionen pro Eintrag (ein Klick = sofort, kein Menü)
+  document.querySelectorAll('[data-noteup]').forEach(b => b.onclick = () => { if (!b.disabled) checkItemUp(+b.dataset.noteup); });
+  document.querySelectorAll('[data-notedown]').forEach(b => b.onclick = () => { if (!b.disabled) checkItemDown(+b.dataset.notedown); });
+  document.querySelectorAll('[data-noteindent]').forEach(b => b.onclick = () => { if (!b.disabled) checkItemIndent(+b.dataset.noteindent); });
+  document.querySelectorAll('[data-noteoutdent]').forEach(b => b.onclick = () => { if (!b.disabled) checkItemOutdent(+b.dataset.noteoutdent); });
+  document.querySelectorAll('[data-noteitemdel]').forEach(b => b.onclick = () => checkItemDelete(+b.dataset.noteitemdel));
   const noteDel = document.querySelector('[data-notedelete]');
   if (noteDel) noteDel.onclick = async () => {
     const ok = await confirmSheet({ title:'Diese Notiz wirklich löschen?', confirmText:'Löschen', danger:true });
