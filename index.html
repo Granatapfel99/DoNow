@@ -767,6 +767,25 @@ body.dnd-active .sport-ex{user-select:none;-webkit-user-select:none;}
 .sheet::-webkit-scrollbar-thumb{background:var(--elev-hi);border-radius:99px;border:2px solid transparent;background-clip:padding-box;}
 .sheet::-webkit-scrollbar-thumb:hover{background:var(--elev-hover);background-clip:padding-box;}
 @media(min-width:600px){.overlay{align-items:center;padding:20px;} .sheet{border-radius:22px;max-height:90vh;border:1px solid var(--line);}}
+
+/* DoNow-native Dialoge (confirm/prompt-Ersatz) — immer mittig, kompakt */
+.overlay:has(.dialog){align-items:center;padding:24px;}
+.dialog{background:var(--card);width:100%;max-width:380px;margin:auto;border-radius:20px;border:1px solid var(--line);box-shadow:0 18px 50px var(--shadow);animation:dialogpop .26s cubic-bezier(.16,1,.3,1);overflow:hidden;}
+.dialog-body{padding:22px 22px 18px;}
+.dialog-title{font-family:'Bricolage Grotesque';font-weight:700;font-size:17px;line-height:1.3;color:var(--text);}
+.dialog-msg{font-size:14px;line-height:1.55;color:var(--muted);margin-top:9px;white-space:pre-line;}
+.dialog-input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:13px 14px;font-size:15px;color:var(--text);font-family:'Sora',sans-serif;margin-top:16px;outline:none;transition:border-color .13s;}
+.dialog-input:focus{border-color:var(--accent-dim);}
+.dialog-actions{display:flex;gap:9px;margin-top:20px;}
+.dialog-btn{flex:1;border:none;border-radius:11px;padding:12px;font-size:14.5px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;transition:filter .12s,transform .1s,background-color .12s;}
+.dialog-btn:active{transform:scale(.98);}
+.dialog-btn.cancel{background:var(--card-hi);color:var(--text);}
+.dialog-btn.cancel:hover{background:var(--elev-hi);}
+.dialog-btn.ok{background:var(--accent);color:var(--accent-on);}
+.dialog-btn.ok:hover{filter:brightness(.92);}
+.dialog-btn.danger{background:var(--p1);color:#fff;}
+.dialog-btn.danger:hover{filter:brightness(1.08);}
+@keyframes dialogpop{from{opacity:0;transform:scale(.94) translateY(8px);}to{opacity:1;transform:scale(1) translateY(0);}}
 .sheet-head{position:sticky;top:0;background:var(--card);display:flex;align-items:center;justify-content:space-between;padding:15px 16px;border-bottom:1px solid var(--line);z-index:3;}
 .sheet-head .h-title{font-family:'Bricolage Grotesque';font-weight:700;font-size:16px;}
 .h-x,.h-ok{width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:filter .12s;}
@@ -2028,8 +2047,8 @@ function emptyTrash(){
 }
 
 /* ── Bereiche/Kategorien verwalten ── */
-function renameArea(oldName){
-  const neu = (prompt(`Bereich umbenennen:`, oldName) || '').trim();
+async function renameArea(oldName){
+  const neu = (await promptSheet({ title:'Bereich umbenennen', placeholder:'Name', value:oldName, confirmText:'Umbenennen' }) || '').trim();
   if (!neu || neu === oldName) return;
   let n = 0;
   TASKS.forEach(t => { if (t.category === oldName){ t.category = neu; n++; pushUpsert(t, false); } });
@@ -2037,14 +2056,19 @@ function renameArea(oldName){
   render();
   showToast(`Bereich umbenannt (${n} ${n===1?'Aufgabe':'Aufgaben'})`);
 }
-function deleteArea(name){
+async function deleteArea(name){
   const affected = TASKS.filter(t => t.category === name);
-  if (!confirm(`Bereich „${name}“ löschen?\n\n${affected.length} ${affected.length===1?'Aufgabe bleibt':'Aufgaben bleiben'} erhalten und ${affected.length===1?'wird':'werden'} „Ohne Bereich“ zugeordnet.`)) return;
+  const ok = await confirmSheet({
+    title:`Bereich „${name}" löschen?`,
+    message:`${affected.length} ${affected.length===1?'Aufgabe bleibt':'Aufgaben bleiben'} erhalten und ${affected.length===1?'wird':'werden'} „Ohne Bereich" zugeordnet.`,
+    confirmText:'Löschen', danger:true
+  });
+  if (!ok) return;
   const snapshot = affected.map(t => t.id);
   affected.forEach(t => { t.category = null; pushUpsert(t, false); });
   if (AREA_FILTER === name) AREA_FILTER = null;
   render();
-  showToast(`Bereich „${name}“ entfernt`);
+  showToast(`Bereich „${name}" entfernt`);
 }
 
 /* ═══════════════ LINKS (Shortcut-Sammlung) ═══════════════ */
@@ -2122,10 +2146,11 @@ function toggleLinkFav(id){
   LINKS.sort((a,b) => (b.fav?1:0)-(a.fav?1:0) || (a.createdAt||0)-(b.createdAt||0));
   render();
 }
-function deleteLink(id){
+async function deleteLink(id){
   const l = LINKS.find(x => x.id === id);
   if (!l) return;
-  if (!confirm(`Link „${l.title}“ löschen?`)) return;
+  const ok = await confirmSheet({ title:`Link „${l.title}" löschen?`, confirmText:'Löschen', danger:true });
+  if (!ok) return;
   LINKS = LINKS.filter(x => x.id !== id);
   pushDelete(id);
   render();
@@ -2138,6 +2163,71 @@ function deleteLink(id){
    Function im nächsten Schritt. Bis dahin sauberer Hinweis statt Fehler. */
 /* ═══════════════ TOAST ═══════════════ */
 let toastUndo = null;
+/* ═══════════════ DIALOGE (DoNow-nativ, ersetzen confirm/prompt) ═══════════════ */
+
+/* Bestätigungs-Dialog im DoNow-Stil. Gibt ein Promise<boolean> zurück.
+   opts: { title, message, confirmText, cancelText, danger } */
+function confirmSheet(opts){
+  return new Promise(resolve => {
+    const o = opts || {};
+    const danger = !!o.danger;
+    const ov = document.createElement('div');
+    ov.className = 'overlay';
+    ov.innerHTML = `<div class="dialog">
+      <div class="dialog-body">
+        <div class="dialog-title">${esc(o.title || 'Bist du sicher?')}</div>
+        ${o.message ? `<div class="dialog-msg">${esc(o.message)}</div>` : ''}
+        <div class="dialog-actions">
+          <button class="dialog-btn cancel" id="dlgCancel">${esc(o.cancelText || 'Abbrechen')}</button>
+          <button class="dialog-btn ${danger ? 'danger' : 'ok'}" id="dlgOk">${esc(o.confirmText || 'OK')}</button>
+        </div>
+      </div>
+    </div>`;
+    let done = false;
+    const finish = (val) => { if (done) return; done = true; document.removeEventListener('keydown', onKey); ov.remove(); resolve(val); };
+    const onKey = e => { if (e.key === 'Escape') finish(false); else if (e.key === 'Enter') finish(true); };
+    ov.onmousedown = e => { if (e.target === ov) finish(false); };
+    document.body.appendChild(ov);
+    document.addEventListener('keydown', onKey);
+    $('dlgCancel').onclick = () => finish(false);
+    $('dlgOk').onclick = () => finish(true);
+    setTimeout(() => { const b = $('dlgOk'); if (b) b.focus(); }, 30);
+  });
+}
+
+/* Eingabe-Dialog im DoNow-Stil. Gibt ein Promise<string|null> zurück (null = abgebrochen).
+   opts: { title, placeholder, value, confirmText, cancelText } */
+function promptSheet(opts){
+  return new Promise(resolve => {
+    const o = opts || {};
+    const ov = document.createElement('div');
+    ov.className = 'overlay';
+    ov.innerHTML = `<div class="dialog">
+      <div class="dialog-body">
+        <div class="dialog-title">${esc(o.title || 'Eingabe')}</div>
+        ${o.message ? `<div class="dialog-msg">${esc(o.message)}</div>` : ''}
+        <input class="dialog-input" id="dlgInput" placeholder="${esc(o.placeholder || '')}" value="${esc(o.value || '')}">
+        <div class="dialog-actions">
+          <button class="dialog-btn cancel" id="dlgCancel">${esc(o.cancelText || 'Abbrechen')}</button>
+          <button class="dialog-btn ok" id="dlgOk">${esc(o.confirmText || 'Speichern')}</button>
+        </div>
+      </div>
+    </div>`;
+    let done = false;
+    const finish = (val) => { if (done) return; done = true; document.removeEventListener('keydown', onKey); ov.remove(); resolve(val); };
+    const onKey = e => {
+      if (e.key === 'Escape') finish(null);
+      else if (e.key === 'Enter'){ const v = $('dlgInput').value.trim(); finish(v || null); }
+    };
+    ov.onmousedown = e => { if (e.target === ov) finish(null); };
+    document.body.appendChild(ov);
+    document.addEventListener('keydown', onKey);
+    $('dlgCancel').onclick = () => finish(null);
+    $('dlgOk').onclick = () => { const v = $('dlgInput').value.trim(); finish(v || null); };
+    setTimeout(() => { const i = $('dlgInput'); if (i){ i.focus(); i.select(); } }, 30);
+  });
+}
+
 function showToast(msg, undo){
   const el = $('toast');
   toastUndo = undo || null;
@@ -3232,11 +3322,12 @@ function openDayEditSheet(i){
     const ti = $('dayTitle');
     if (chosenType === 'rest' && (!ti.value || ti.value.startsWith('Tag'))) ti.value = 'Ruhetag';
   });
-  $('daySave').onclick = () => {
+  $('daySave').onclick = async () => {
     const newTitle = ($('dayTitle').value||'').trim() || day.title;
     // Wechsel auf Ruhetag mit vorhandenen Übungen → Rückfrage
     if (chosenType === 'rest' && day.exercises.length){
-      if (!confirm('Als Ruhetag markieren? Die Übungen dieses Tages werden entfernt.')) return;
+      const ok = await confirmSheet({ title:'Als Ruhetag markieren?', message:'Die Übungen dieses Tages werden entfernt.', confirmText:'Ja, Ruhetag', danger:true });
+      if (!ok) return;
       day.exercises = [];
     }
     day.type = chosenType;
@@ -4035,18 +4126,21 @@ function bindRoot(){
   if (aBack) aBack.onclick = () => { AREA_OPEN = null; SPORT_DAY = null; DOC_FOLDER = null; render(); window.scrollTo(0,0); };
   document.querySelectorAll('[data-areatab]').forEach(b => b.onclick = () => { AREA_TAB = b.dataset.areatab; SPORT_DAY = null; DOC_FOLDER = null; render(); window.scrollTo(0,0); });
   const aAdd = document.querySelector('[data-areaadd]');
-  if (aAdd) aAdd.onclick = () => {
-    const name = prompt('Name des neuen Bereichs (z. B. Auto, Steuer, Rechtsschutz, Studium):');
+  if (aAdd) aAdd.onclick = async () => {
+    const name = await promptSheet({ title:'Neuer Bereich', message:'z. B. Auto, Steuer, Rechtsschutz, Studium', placeholder:'Name des Bereichs', confirmText:'Anlegen' });
     if (name && name.trim()){ areaAdd(name); render(); }
   };
   const aDel = document.querySelector('[data-areadel]');
-  if (aDel) aDel.onclick = () => {
+  if (aDel) aDel.onclick = async () => {
     const id = aDel.dataset.areadel;
     const area = areaById(id);
     const noteCnt = notesInAreaId(id).length;
-    if (confirm(`Bereich „${area?area.name:''}"${noteCnt?` mit ${noteCnt} Notiz(en)`:''} wirklich löschen?`)){
-      areaDelete(id); AREA_OPEN = null; render();
-    }
+    const ok = await confirmSheet({
+      title:`Bereich „${area?area.name:''}" löschen?`,
+      message: noteCnt ? `${noteCnt} Notiz(en) in diesem Bereich werden mitgelöscht.` : '',
+      confirmText:'Löschen', danger:true
+    });
+    if (ok){ areaDelete(id); AREA_OPEN = null; render(); }
   };
   const aIcon = document.querySelector('[data-areaicon]');
   if (aIcon) aIcon.onclick = () => openAreaIconSheet(aIcon.dataset.areaicon);
@@ -4061,8 +4155,9 @@ function bindRoot(){
   const sBack = document.querySelector('[data-sportback]');
   if (sBack) sBack.onclick = () => { SPORT_DAY = null; render(); window.scrollTo(0,0); };
   const sReset = document.querySelector('[data-sportreset]');
-  if (sReset) sReset.onclick = () => {
-    if (confirm('Standard-Trainingsplan laden? Dein aktueller Plan und eingetragene Sätze werden ersetzt.')){
+  if (sReset) sReset.onclick = async () => {
+    const ok = await confirmSheet({ title:'Standard-Trainingsplan laden?', message:'Dein aktueller Plan und eingetragene Sätze werden ersetzt.', confirmText:'Laden', danger:true });
+    if (ok){
       const keepNutri = WORKOUT && WORKOUT.nutrition;
       WORKOUT = defaultWorkoutPlan();
       if (keepNutri) WORKOUT.nutrition = keepNutri;   // Ernährung nicht anfassen
@@ -4070,15 +4165,15 @@ function bindRoot(){
     }
   };
   const sEmpty = document.querySelector('[data-sportempty]');
-  if (sEmpty) sEmpty.onclick = () => {
-    if (confirm('Trainingsplan komplett leeren, um selbst von Grund auf zu bauen? Alle Übungen und eingetragenen Sätze werden entfernt.')){
-      resetWorkout(); SPORT_DAY = null; render();
-    }
+  if (sEmpty) sEmpty.onclick = async () => {
+    const ok = await confirmSheet({ title:'Trainingsplan komplett leeren?', message:'Alle Übungen und eingetragenen Sätze werden entfernt, um von Grund auf zu bauen.', confirmText:'Leeren', danger:true });
+    if (ok){ resetWorkout(); SPORT_DAY = null; render(); }
   };
   const dayClear = document.querySelector('[data-dayclear]');
-  if (dayClear) dayClear.onclick = () => {
+  if (dayClear) dayClear.onclick = async () => {
     const i = +dayClear.dataset.dayclear;
-    if (confirm('Alle Übungen dieses Tages entfernen?')){ clearWorkoutDay(i); render(); }
+    const ok = await confirmSheet({ title:'Alle Übungen dieses Tages entfernen?', confirmText:'Entfernen', danger:true });
+    if (ok){ clearWorkoutDay(i); render(); }
   };
   const dayEdit = document.querySelector('[data-dayedit]');
   if (dayEdit) dayEdit.onclick = () => openDayEditSheet(+dayEdit.dataset.dayedit);
@@ -4151,16 +4246,14 @@ function bindRoot(){
   const nShop = document.querySelector('[data-nutrishop]');
   if (nShop) nShop.onclick = () => openShoppingSheet();
   const nStd = document.querySelector('[data-nutristd]');
-  if (nStd) nStd.onclick = () => {
-    if (confirm('Standard-Essensplan laden? Dein aktueller Essensplan wird ersetzt (Trainingsplan bleibt).')){
-      WORKOUT.nutrition = defaultNutrition(); pushUpsert(WORKOUT, false); NUTRI_DAY = null; render();
-    }
+  if (nStd) nStd.onclick = async () => {
+    const ok = await confirmSheet({ title:'Standard-Essensplan laden?', message:'Dein aktueller Essensplan wird ersetzt (Trainingsplan bleibt).', confirmText:'Laden', danger:true });
+    if (ok){ WORKOUT.nutrition = defaultNutrition(); pushUpsert(WORKOUT, false); NUTRI_DAY = null; render(); }
   };
   const nEmpty = document.querySelector('[data-nutriempty]');
-  if (nEmpty) nEmpty.onclick = () => {
-    if (confirm('Essensplan komplett leeren, um selbst zu bauen? Alle Rezepte und Mahlzeiten werden entfernt (Trainingsplan bleibt).')){
-      resetNutrition(); NUTRI_DAY = null; render();
-    }
+  if (nEmpty) nEmpty.onclick = async () => {
+    const ok = await confirmSheet({ title:'Essensplan komplett leeren?', message:'Alle Rezepte und Mahlzeiten werden entfernt (Trainingsplan bleibt).', confirmText:'Leeren', danger:true });
+    if (ok){ resetNutrition(); NUTRI_DAY = null; render(); }
   };
 
   // ── Notiz-Detail-Handler ──
@@ -4185,9 +4278,10 @@ function bindRoot(){
       if (file) await uploadDoc(areaId, file, intoFolder);
     };
   }
-  document.querySelectorAll('[data-docdel]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('[data-docdel]').forEach(b => b.onclick = async () => {
     const id = b.dataset.docdel;
-    if (confirm('Dieses Dokument wirklich löschen?')){ docDelete(id); render(); }
+    const ok = await confirmSheet({ title:'Dieses Dokument wirklich löschen?', confirmText:'Löschen', danger:true });
+    if (ok){ docDelete(id); render(); }
   });
   document.querySelectorAll('[data-docopen]').forEach(b => b.onclick = async () => {
     const doc = NOTES.find(n => n.id === b.dataset.docopen);
@@ -4204,9 +4298,9 @@ function bindRoot(){
   });
   // Ordner: anlegen, öffnen, zurück, löschen
   const newFolder = document.querySelector('[data-newfolder]');
-  if (newFolder) newFolder.onclick = () => {
+  if (newFolder) newFolder.onclick = async () => {
     const parentId = newFolder.dataset.newparent || null;
-    const name = prompt(parentId ? 'Name des Unterordners:' : 'Name des Ordners (z. B. Versicherung, Steuer 2025):');
+    const name = await promptSheet({ title: parentId ? 'Neuer Unterordner' : 'Neuer Ordner', message: parentId ? '' : 'z. B. Versicherung, Steuer 2025', placeholder:'Name des Ordners', confirmText:'Anlegen' });
     if (name && name.trim()){ docFolderCreate(newFolder.dataset.newfolder, name, parentId); render(); }
   };
   document.querySelectorAll('[data-folderopen]').forEach(b => b.onclick = e => {
@@ -4217,19 +4311,20 @@ function bindRoot(){
   document.querySelectorAll('[data-crumbgo]').forEach(b => b.onclick = () => {
     DOC_FOLDER = b.dataset.crumbgo || null; render(); window.scrollTo(0,0);
   });
-  document.querySelectorAll('[data-folderdel]').forEach(b => b.onclick = e => {
+  document.querySelectorAll('[data-folderdel]').forEach(b => b.onclick = async e => {
     e.stopPropagation();
     const f = folderById(b.dataset.folderdel);
     const dCnt = f ? docsInFolder(f.areaId, f.id).length : 0;
     const sCnt = f ? foldersInParent(f.areaId, f.id).length : 0;
-    let msg = `Ordner „${f?f.title:''}" löschen?`;
+    let msg = '';
     if (dCnt || sCnt){
       const bits = [];
       if (dCnt) bits.push(`${dCnt} ${dCnt===1?'Dokument':'Dokumente'}`);
       if (sCnt) bits.push(`${sCnt} ${sCnt===1?'Unterordner':'Unterordner'}`);
-      msg += ` ${bits.join(' und ')} wandern eine Ebene höher (werden nicht gelöscht).`;
+      msg = `${bits.join(' und ')} wandern eine Ebene höher (werden nicht gelöscht).`;
     }
-    if (confirm(msg)){ docFolderDelete(b.dataset.folderdel); render(); }
+    const ok = await confirmSheet({ title:`Ordner „${f?f.title:''}" löschen?`, message:msg, confirmText:'Löschen', danger:true });
+    if (ok){ docFolderDelete(b.dataset.folderdel); render(); }
   });
   // Ordner in anderen Ordner verschieben
   document.querySelectorAll('[data-foldermove]').forEach(b => b.onclick = e => { e.stopPropagation(); openFolderMoveSheet(b.dataset.foldermove); });
@@ -4306,10 +4401,9 @@ function bindRoot(){
     if (n && n.items[idx]){ n.items[idx].level = n.items[idx].level ? 0 : 1; noteSave(n); render(); }
   });
   const noteDel = document.querySelector('[data-notedelete]');
-  if (noteDel) noteDel.onclick = () => {
-    if (confirm('Diese Notiz wirklich löschen?')){
-      noteDelete(noteDel.dataset.notedelete); NOTE_OPEN = null; render();
-    }
+  if (noteDel) noteDel.onclick = async () => {
+    const ok = await confirmSheet({ title:'Diese Notiz wirklich löschen?', confirmText:'Löschen', danger:true });
+    if (ok){ noteDelete(noteDel.dataset.notedelete); NOTE_OPEN = null; render(); }
   };
   // Verknüpfungen
   const addNoteLink = document.querySelector('[data-noteaddlink]');
@@ -4414,9 +4508,15 @@ function bindRoot(){
 
   // Papierkorb
   document.querySelectorAll('[data-restore]').forEach(b => b.onclick = () => restoreTask(b.dataset.restore));
-  document.querySelectorAll('[data-purge]').forEach(b => b.onclick = () => { if (confirm("Endgültig löschen? Das kann nicht rückgängig gemacht werden.")) purgeTask(b.dataset.purge); });
+  document.querySelectorAll('[data-purge]').forEach(b => b.onclick = async () => {
+    const ok = await confirmSheet({ title:'Endgültig löschen?', message:'Das kann nicht rückgängig gemacht werden.', confirmText:'Löschen', danger:true });
+    if (ok) purgeTask(b.dataset.purge);
+  });
   const et = document.querySelector('[data-emptytrash]');
-  if (et) et.onclick = () => { if (confirm("Papierkorb wirklich leeren?")) emptyTrash(); };
+  if (et) et.onclick = async () => {
+    const ok = await confirmSheet({ title:'Papierkorb wirklich leeren?', message:'Alle Aufgaben im Papierkorb werden endgültig gelöscht.', confirmText:'Leeren', danger:true });
+    if (ok) emptyTrash();
+  };
 
   // Übersicht: Kategorie-Filter (eigener Attributname, nicht mit Bereichen verwechseln)
   document.querySelectorAll('[data-catfilter]').forEach(b => b.onclick = e => {
@@ -4468,9 +4568,10 @@ function bindRoot(){
   const fr = $('factoryResetBtn');
   if (fr) fr.onclick = openFactoryResetSheet;
   const ta = $('trashAllBtn');
-  if (ta) ta.onclick = () => {
+  if (ta) ta.onclick = async () => {
     if (!TASKS.length) return;
-    if (!confirm("Alle Aufgaben in den Papierkorb verschieben?")) return;
+    const ok = await confirmSheet({ title:'Alle Aufgaben in den Papierkorb?', message:'Du kannst sie von dort wiederherstellen oder endgültig löschen.', confirmText:'Verschieben', danger:true });
+    if (!ok) return;
     const old = TASKS.slice();
     old.forEach(t => { t.deletedAt = Date.now(); TRASH.unshift(t); pushUpsert(t, true); });
     TASKS = []; render();
@@ -4952,8 +5053,9 @@ function openLogEditSheet(i, j, ts){
   };
 
   // Löschen
-  $('logDelete').onclick = () => {
-    if (confirm('Diesen Eintrag wirklich löschen?')){
+  $('logDelete').onclick = async () => {
+    const ok = await confirmSheet({ title:'Diesen Eintrag wirklich löschen?', confirmText:'Löschen', danger:true });
+    if (ok){
       ex.log = (ex.log||[]).filter(l => String(l.ts) !== String(ts));
       pushUpsert(WORKOUT, false);
       closeSportSheet(); render();
@@ -5605,8 +5707,9 @@ function bindSheet(){
     } catch(err){ showToast('Konnte nicht öffnen'); }
   };
   const dad = document.querySelector('[data-draftattachdel]');
-  if (dad) dad.onclick = () => {
-    if (!confirm('Anhang entfernen?')) return;
+  if (dad) dad.onclick = async () => {
+    const ok = await confirmSheet({ title:'Anhang entfernen?', confirmText:'Entfernen', danger:true });
+    if (!ok) return;
     // Nur löschen, wenn es NICHT der beim Öffnen vorhandene Anhang ist (der wird erst beim
     // Speichern entfernt). Frisch hochgeladene Drafts-Anhänge sofort aus dem Speicher räumen.
     if (DRAFT.attach && DRAFT.attach.path && DRAFT.attach.path !== DRAFT._attachAtOpen && sb){
