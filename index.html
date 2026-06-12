@@ -1988,7 +1988,7 @@ function removeTask(id){
   t.deletedAt = Date.now();
   TASKS.splice(idx, 1);
   TRASH.unshift(t);
-  closeSheet(); render();
+  closeSheet(true); render();
   pushUpsert(t, true);   // in der Cloud als trashed markieren
   showToast(`„${t.text || 'Aufgabe'}" in den Papierkorb`, () => {
     const j = TRASH.findIndex(x => x.id === id);
@@ -3066,6 +3066,35 @@ function removeTaskAttachment(taskId){
   pushUpsert(t, false);
   render();
   showToast('Anhang entfernt');
+}
+
+/* Lädt einen Anhang direkt für den aktuellen DRAFT hoch — funktioniert auch,
+   wenn die Aufgabe noch nicht gespeichert ist. Schreibt das Ergebnis in DRAFT.attach.
+   Gibt true bei Erfolg zurück. */
+async function uploadDraftAttachment(file){
+  if (!sb || !USER){ showToast('Keine Verbindung'); return false; }
+  if (!DRAFT){ return false; }
+  if (file.size > 10*1024*1024){ showToast('Datei zu groß (max. 10 MB)'); return false; }
+  showToast('Lade hoch…');
+  try {
+    const compressed = await compressImage(file);
+    const ext = (compressed.name.split('.').pop()||'dat').toLowerCase();
+    const path = `${USER.id}/tasks/${DRAFT.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+    const { error: upErr } = await sb.storage.from(DOC_BUCKET).upload(path, compressed, { upsert:false, contentType:compressed.type });
+    if (upErr) throw upErr;
+    // Alten DRAFT-Anhang entfernen (nur 1 pro Aufgabe) — aber NICHT den, der beim Öffnen
+    // schon da war (der gehört zur gespeicherten Aufgabe, wird erst beim echten Speichern ersetzt).
+    if (DRAFT.attach && DRAFT.attach.path && DRAFT.attach.path !== DRAFT._attachAtOpen){
+      sb.storage.from(DOC_BUCKET).remove([DRAFT.attach.path]).catch(()=>{});
+    }
+    DRAFT.attach = { path, type: compressed.type, size: compressed.size, name: file.name };
+    showToast('Angehängt ✓');
+    return true;
+  } catch(e){
+    console.warn('Anhang-Upload-Fehler:', e.message);
+    showToast('Upload fehlgeschlagen — ist der Bucket eingerichtet?');
+    return false;
+  }
 }
 async function openTaskAttachment(taskId){
   const t = [...TASKS, ...TRASH].find(x => x.id === taskId);
@@ -4588,13 +4617,22 @@ function blankDraft(p){
 let sheetEl = null;
 let DRAFT = null;
 
-function closeSheet(){
+function closeSheet(saved){
+  // Abbruch ohne Speichern: ein frisch hochgeladener Anhang würde sonst verwaisen → löschen.
+  if (!saved && DRAFT && DRAFT.attach && DRAFT.attach.path && DRAFT.attach.path !== DRAFT._attachAtOpen && sb){
+    sb.storage.from(DOC_BUCKET).remove([DRAFT.attach.path]).catch(()=>{});
+  }
   if (sheetEl){ sheetEl.remove(); sheetEl = null; DRAFT = null; }
 }
 
 function openSheet(draft){
   DRAFT = JSON.parse(JSON.stringify(draft));
   if (!DRAFT.subtasks) DRAFT.subtasks = [];
+  // Neue (noch nicht gespeicherte) Aufgabe? Dann sofort eine ID vergeben,
+  // damit auch direkt beim Anlegen ein Anhang hochgeladen werden kann.
+  DRAFT._isNew = !DRAFT.id;
+  if (!DRAFT.id) DRAFT.id = uid();
+  DRAFT._attachAtOpen = DRAFT.attach ? DRAFT.attach.path : null; // für Abbruch-Aufräumen
   // Sheet-lokaler UI-Zustand
   DRAFT._dateOn = !!DRAFT.due;
   DRAFT._dateVal = DRAFT.due ? startOfDay(new Date(DRAFT.due)).toISOString() : startOfDay(new Date()).toISOString();
@@ -5372,25 +5410,23 @@ function renderSheet(){
     h += `</div>`;
   }
 
-  // Anhang (Aufgabe + Erinnerung) — genau 1 Datei. Nur bei gespeicherten Aufgaben (brauchen ID).
+  // Anhang (Aufgabe + Erinnerung) — genau 1 Datei. Auch direkt beim Anlegen möglich.
   h += `<div class="sec-lbl">Anhang</div>`;
-  if (!d.id){
-    h += `<div class="attach-hint">Speichere die Aufgabe zuerst, dann kannst du einen Anhang hinzufügen.</div>`;
-  } else if (d.attach && d.attach.path){
+  if (d.attach && d.attach.path){
     const isImg = d.attach.type && d.attach.type.startsWith('image/');
     h += `<div class="attach-card">
-      <button class="attach-open" data-attachopen="${esc(d.id)}">
+      <button class="attach-open" data-draftattachopen="1">
         <span class="attach-ic">${isImg?IC.image:IC.paperclip}</span>
         <span class="attach-info"><span class="attach-name">${esc(d.attach.name||'Anhang')}</span><span class="attach-meta">${isImg?'Bild':'Datei'}${d.attach.size?` · ${fmtSize(d.attach.size)}`:''}</span></span>
       </button>
-      <button class="attach-del" data-attachdel="${esc(d.id)}" aria-label="Anhang entfernen">${IC.trash2}</button>
+      <button class="attach-del" data-draftattachdel="1" aria-label="Anhang entfernen">${IC.trash2}</button>
     </div>`;
   } else {
     h += `<button class="attach-add" id="attachAdd">${IC.paperclip} Foto oder Datei anhängen</button>
       <input type="file" id="attachFileInput" accept="image/*,application/pdf" style="display:none">`;
   }
 
-  if (d.id){
+  if (!d._isNew){
     h += `<button class="del-btn" id="sheetDel">${IC.trash2}Löschen</button>`;
   }
 
@@ -5446,17 +5482,26 @@ function buildFromDraft(){
     due, hasTime, notify: d._dateOn ? d.notify : false, repeat,
     status: eff, done, completedAt: done ? (d.completedAt || Date.now()) : null,
     subtasks: isRem ? [] : (d.subtasks||[]).filter(s => (s.text||'').trim()),
+    attach: d.attach || null,
     createdAt: d.createdAt
   };
 }
 
 function bindSheet(){
   $('sheetClose').onclick = closeSheet;
-  $('sheetSave').onclick = () => { if (!(DRAFT.text&&DRAFT.text.trim())) return; saveTask(buildFromDraft()); closeSheet(); };
+  $('sheetSave').onclick = () => {
+    if (!(DRAFT.text&&DRAFT.text.trim())) return;
+    // Bestehende Aufgabe + Anhang wurde ersetzt → alten aus dem Speicher löschen.
+    if (DRAFT._attachAtOpen && (!DRAFT.attach || DRAFT.attach.path !== DRAFT._attachAtOpen) && sb){
+      sb.storage.from(DOC_BUCKET).remove([DRAFT._attachAtOpen]).catch(()=>{});
+    }
+    saveTask(buildFromDraft());
+    closeSheet(true);
+  };
 
   const title = $('sTitle');
   title.oninput = () => { DRAFT.text = title.value; $('sheetSave').disabled = !title.value.trim(); };
-  title.onkeydown = e => { if (e.key==='Enter' && title.value.trim()){ saveTask(buildFromDraft()); closeSheet(); } };
+  title.onkeydown = e => { if (e.key==='Enter' && title.value.trim()){ saveTask(buildFromDraft()); closeSheet(true); } };
   const notes = $('sNotes');
   if (notes) notes.oninput = () => DRAFT.notes = notes.value;
   const cat = $('sCat');
@@ -5545,20 +5590,31 @@ function bindSheet(){
     if (fi) fi.onchange = async e => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
-      await uploadTaskAttachment(DRAFT.id, file);
-      // DRAFT mit dem echten Task synchronisieren, damit das Sheet den Anhang zeigt
-      const real = [...TASKS, ...TRASH].find(x => x.id === DRAFT.id);
-      if (real) DRAFT.attach = real.attach;
-      renderSheet();
+      const ok = await uploadDraftAttachment(file);
+      if (ok) renderSheet();
     };
   }
-  document.querySelectorAll('[data-attachopen]').forEach(b => b.onclick = () => openTaskAttachment(b.dataset.attachopen));
-  document.querySelectorAll('[data-attachdel]').forEach(b => b.onclick = () => {
+  const dao = document.querySelector('[data-draftattachopen]');
+  if (dao) dao.onclick = async () => {
+    if (!DRAFT.attach || !DRAFT.attach.path || !sb){ showToast('Anhang nicht gefunden'); return; }
+    showToast('Öffne…');
+    try {
+      const { data, error } = await sb.storage.from(DOC_BUCKET).createSignedUrl(DRAFT.attach.path, 3600);
+      if (error) throw error;
+      window.open(data.signedUrl, '_blank', 'noopener');
+    } catch(err){ showToast('Konnte nicht öffnen'); }
+  };
+  const dad = document.querySelector('[data-draftattachdel]');
+  if (dad) dad.onclick = () => {
     if (!confirm('Anhang entfernen?')) return;
-    removeTaskAttachment(b.dataset.attachdel);
+    // Nur löschen, wenn es NICHT der beim Öffnen vorhandene Anhang ist (der wird erst beim
+    // Speichern entfernt). Frisch hochgeladene Drafts-Anhänge sofort aus dem Speicher räumen.
+    if (DRAFT.attach && DRAFT.attach.path && DRAFT.attach.path !== DRAFT._attachAtOpen && sb){
+      sb.storage.from(DOC_BUCKET).remove([DRAFT.attach.path]).catch(()=>{});
+    }
     DRAFT.attach = null;
     renderSheet();
-  });
+  };
 
   // Wheels: Scroll-Snap → Wert übernehmen
   document.querySelectorAll('[data-wheel]').forEach(w => {
